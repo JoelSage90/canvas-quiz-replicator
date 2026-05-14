@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Quiz App</title>
+<title>Canvaz</title>
 
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -12,7 +12,7 @@
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 16px;
     color: #2d3b45;
-    background: #f5f5f5;
+    background: #ffffff;
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -205,6 +205,7 @@
     max-width: 1000px;
     margin: 0 auto;
     border: 1px solid #e1e7ea;
+    box-shadow: 0 2px 4px rgba(31, 41, 51, 0.1);
   }
 
   .quiz-title {
@@ -280,10 +281,68 @@
     cursor: pointer;
   }
 
-  .option input[type="radio"] {
+  .option input[type="radio"],
+  .option input[type="checkbox"] {
     width: 18px;
     height: 18px;
     accent-color: #0770a3;
+  }
+
+  .matching-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    list-style: none;
+    margin-top: 30px;
+  }
+
+  .matching-row {
+    display: grid;
+    grid-template-columns: minmax(220px, 1fr) minmax(80px, 0.5fr) minmax(220px, 1fr);
+    align-items: center;
+  }
+
+  .matching-prompt {
+    background: #f1f3f4;
+    border: 1px solid #e1e7ea;
+    color: #2d3b45;
+    font-size: 15px;
+    min-height: 38px;
+    padding: 9px 10px;
+  }
+
+  .matching-line {
+    border-top: 2px solid #2d3b45;
+    height: 1px;
+  }
+
+  .matching-select {
+    width: 100%;
+    min-height: 38px;
+    border: 1px solid #8a98a6;
+    border-radius: 4px;
+    background: #fff;
+    color: #2d3b45;
+    font: inherit;
+    padding: 7px 34px 7px 12px;
+  }
+
+  .matching-selected {
+    border: 1px solid #dfe3e6;
+    border-radius: 4px;
+    font-size: 15px;
+    min-height: 38px;
+    padding: 9px 10px;
+  }
+
+  .matching-selected.correct-answer {
+    border-color: #0b8f3a;
+    background: #f3fff6;
+  }
+
+  .matching-selected.incorrect-answer {
+    border-color: #d93025;
+    background: #fff5f5;
   }
 
   .question-separator {
@@ -366,25 +425,39 @@
     background: #fff5f5;
   }
 
-  .result-radio {
+  .result-marker {
     width: 18px;
     height: 18px;
-    border-radius: 50%;
     border: 2px solid #6b7780;
     position: relative;
     flex-shrink: 0;
   }
 
-  .result-radio-selected::after {
+  .result-marker.multi-choice {
+    border-radius: 50%;
+  }
+
+  .result-marker.multi-answer {
+    border-radius: 3px;
+  }
+
+  .result-marker-selected::after {
     content: "";
     width: 8px;
     height: 8px;
-    border-radius: 50%;
     background: #2d3b45;
     position: absolute;
     top: 50%;
-    left: 50%;
+	    left: 50%;
     transform: translate(-50%, -50%);
+  }
+
+  .result-marker.multi-choice.result-marker-selected::after {
+    border-radius: 50%;
+  }
+
+  .result-marker.multi-answer.result-marker-selected::after {
+    border-radius: 1px;
   }
 
   .result-feedback {

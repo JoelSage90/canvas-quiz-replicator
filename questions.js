@@ -9,6 +9,7 @@ const QUIZ_DATA = {
   questions: [
 
     {
+      type: "multi-choice",
       text:
         "When working with large software systems, which approach is more sensible?",
 
@@ -19,10 +20,12 @@ const QUIZ_DATA = {
         "To keep moving forward, even when not fully understanding all aspects."
       ],
 
-      correct: 3
+      correct: 3,
+      points: 1
     },
 
     {
+      type: "multi-choice",
       text:
         "What is the primary purpose of forking a repository on GitLab?",
 
@@ -33,10 +36,12 @@ const QUIZ_DATA = {
         "To archive the repository for future reference."
       ],
 
-      correct: 2
+      correct: 2,
+      points: 1
     },
 
     {
+      type: "multi-choice",
       text:
         "Which command is used to stage changes in Git before committing?",
 
@@ -47,7 +52,63 @@ const QUIZ_DATA = {
         "git save"
       ],
 
-      correct: 1
+      correct: 1,
+      points: 1
+    },
+
+    {
+      type: "multi-answer",
+      text:
+        "Which of the following are useful Git commands for inspecting repository state?",
+
+      options: [
+        "git status",
+        "git commit",
+        "git log",
+        "git diff",
+        "git delete-history"
+      ],
+
+      correct: [0, 2, 3],
+      points: 3
+    },
+
+    {
+      type: "matching",
+      text:
+        "Match the capability with the generation of C++ that introduced it",
+
+      matches: [
+        {
+          prompt: "Classes",
+          options: [
+            "C++11",
+            "Pre-standard C++",
+            "C++98"
+          ],
+          correct: 1
+        },
+        {
+          prompt: "Parallel computing, extra type safety, cleaner code",
+          options: [
+            "C++11",
+            "Pre-standard C++",
+            "C++98"
+          ],
+          correct: 0
+        },
+        {
+          prompt: "Generic programming and templates",
+          options: [
+            "C++11",
+            "Pre-standard C++",
+            "C++98"
+          ],
+          correct: 2
+        }
+      ],
+
+      points: 3
     }
   ]
 };

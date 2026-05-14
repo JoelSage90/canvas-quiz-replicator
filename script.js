@@ -5,6 +5,9 @@ document.getElementById("quiz-description").textContent = QUIZ_DATA.description;
 
 const questionsContainer = document.getElementById("questions-container");
 const sidebarContainer = document.getElementById("sidebar-questions");
+const totalPoints = QUIZ_DATA.questions.reduce((total, question) => {
+  return total + getQuestionPoints(question);
+}, 0);
 
 QUIZ_DATA.questions.forEach((question, index) => {
 
@@ -21,26 +24,6 @@ QUIZ_DATA.questions.forEach((question, index) => {
 
   sidebarContainer.appendChild(sideNum);
 
-  // Build options
-  const optionsHTML = question.options.map((option, optionIndex) => {
-
-    return `
-      <li class="option">
-        <input
-          type="radio"
-          name="question-${index}"
-          id="q${index}-o${optionIndex}"
-          value="${optionIndex}"
-        >
-
-        <label for="q${index}-o${optionIndex}">
-          ${option}
-        </label>
-      </li>
-    `;
-
-  }).join("");
-
   const questionDiv = document.createElement("div");
 
   questionDiv.className = "question";
@@ -53,7 +36,7 @@ QUIZ_DATA.questions.forEach((question, index) => {
         <div class="question-num">${index + 1}</div>
 
         <div class="question-type-pts">
-          Multiple choice &nbsp;|&nbsp; 1 point
+          ${getQuestionTypeLabel(question)} &nbsp;|&nbsp; ${formatPoints(getQuestionPoints(question))}
         </div>
       </div>
 
@@ -63,9 +46,7 @@ QUIZ_DATA.questions.forEach((question, index) => {
       ${question.text}
     </p>
 
-    <ul class="options">
-      ${optionsHTML}
-    </ul>
+    ${renderQuestionInputs(question, index)}
 
     <hr class="question-separator">
   `;
@@ -86,27 +67,24 @@ document.getElementById("submit-btn").addEventListener("click", () => {
 
   QUIZ_DATA.questions.forEach((question, index) => {
 
-    const selected = document.querySelector(
-      `input[name="question-${index}"]:checked`
-    );
-
-    const selectedValue = selected
-      ? Number(selected.value)
-      : null;
-
-    const isCorrect = selectedValue === question.correct;
-
-    if (isCorrect) {
-      score++;
-    }
+    const selectedAnswer = getSelectedAnswer(question, index);
+    const result = scoreQuestion(question, selectedAnswer);
 
     answers.push({
       question: question.text,
-      options: question.options,
-      correctIndex: question.correct,
-      selectedIndex: selectedValue,
-      correct: isCorrect
+      type: getQuestionType(question),
+      typeLabel: getQuestionTypeLabel(question),
+      points: result.points,
+      earnedPoints: result.earnedPoints,
+      options: question.options || [],
+      matches: question.matches || [],
+      correctIndices: result.correctIndices,
+      selectedIndices: result.selectedIndices,
+      selectedMatches: result.selectedMatches,
+      correct: result.isCorrect
     });
+
+    score += result.earnedPoints;
   });
 
   showResults(score, answers);
@@ -120,7 +98,7 @@ document.getElementById("submit-btn").addEventListener("click", () => {
 function showResults(score, answers) {
 
   const percentage = Math.round(
-    (score / QUIZ_DATA.questions.length) * 100
+    (score / totalPoints) * 100
   );
 
   // Hide original quiz
@@ -168,14 +146,14 @@ function showResults(score, answers) {
             font-weight:bold;
             line-height:1;
           ">
-            ${score}
+            ${formatScore(score)}
           </div>
 
           <div style="
             font-size:20px;
             color:#6b7780;
           ">
-            Out of ${QUIZ_DATA.questions.length} points
+            Out of ${formatScore(totalPoints)} points
           </div>
         </div>
 
@@ -198,7 +176,7 @@ function showResults(score, answers) {
                 <div class="question-num">${index + 1}</div>
 
                 <div class="question-type-pts">
-                  Multiple choice &nbsp;|&nbsp; ${answer.correct ? "1 / 1" : "0 / 1"} point
+                  ${answer.typeLabel} &nbsp;|&nbsp; ${formatScore(answer.earnedPoints)} / ${formatPoints(answer.points)}
                 </div>
               </div>
 
@@ -209,68 +187,24 @@ function showResults(score, answers) {
               ${answer.question}
             </p>
 
-            <!-- Options -->
-            <ul class="options">
-
-              ${answer.options.map((option, optionIndex) => {
-
-                const isCorrect =
-                  optionIndex === answer.correctIndex;
-
-                const isSelected =
-                  optionIndex === answer.selectedIndex;
-
-                const optionClasses = ["option", "result-option"];
-
-                // Correct answer styling
-                if (isCorrect) {
-                  optionClasses.push("correct-answer");
-                }
-
-                // Wrong selected answer
-                if (isSelected && !isCorrect) {
-                  optionClasses.push("incorrect-answer");
-                }
-
-                const radioClasses = ["result-radio"];
-
-                if (isSelected) {
-                  radioClasses.push("result-radio-selected");
-                }
-
-                return `
-
-                  <li class="${optionClasses.join(" ")}">
-
-                    <span class="${radioClasses.join(" ")}"></span>
-
-                    <span>
-                      ${option}
-                    </span>
-
-                  </li>
-                `;
-
-              }).join("")}
-
-            </ul>
+            ${renderAnswerReview(answer)}
 
             <!-- Incorrect message -->
             ${!answer.correct ? `
 
               <div class="result-feedback">
 
-                <span style="
-                  color:#d93025;
-                  font-weight:bold;
+	                <span style="
+	                  color:${answer.earnedPoints > 0 ? "#b36b00" : "#d93025"};
+	                  font-weight:bold;
                 ">
-                  Incorrect
-                </span>
+                  ${answer.earnedPoints > 0 ? "Partially correct" : "Incorrect"}
+	                </span>
 
                 <br><br>
 
-                <strong>Correct Answer:</strong>
-                ${answer.options[answer.correctIndex]}
+                <strong>Correct Answer(s):</strong>
+                ${renderCorrectAnswerText(answer)}
 
               </div>
 
@@ -326,4 +260,262 @@ function animateScoreRing(percentage) {
   }
 
   requestAnimationFrame(updateFrame);
+}
+
+function renderQuestionInputs(question, questionIndex) {
+  const questionType = getQuestionType(question);
+
+  if (questionType === "matching") {
+    return `
+      <ul class="matching-list">
+        ${question.matches.map((match, matchIndex) => {
+          return `
+            <li class="matching-row">
+              <div class="matching-prompt">${match.prompt}</div>
+              <div class="matching-line"></div>
+              <select
+                class="matching-select"
+                name="question-${questionIndex}-match-${matchIndex}"
+                id="q${questionIndex}-m${matchIndex}"
+              >
+                <option value=""></option>
+                ${match.options.map((option, optionIndex) => {
+                  return `
+                    <option value="${optionIndex}">
+                      ${option}
+                    </option>
+                  `;
+                }).join("")}
+              </select>
+            </li>
+          `;
+        }).join("")}
+      </ul>
+    `;
+  }
+
+  const inputType = questionType === "multi-answer"
+    ? "checkbox"
+    : "radio";
+
+  return `
+    <ul class="options">
+      ${question.options.map((option, optionIndex) => {
+        return `
+          <li class="option">
+            <input
+              type="${inputType}"
+              name="question-${questionIndex}"
+              id="q${questionIndex}-o${optionIndex}"
+              value="${optionIndex}"
+            >
+
+            <label for="q${questionIndex}-o${optionIndex}">
+              ${option}
+            </label>
+          </li>
+        `;
+      }).join("")}
+    </ul>
+  `;
+}
+
+function renderAnswerReview(answer) {
+  if (answer.type === "matching") {
+    return `
+      <ul class="matching-list">
+        ${answer.matches.map((match, matchIndex) => {
+          const selectedIndex = answer.selectedMatches[matchIndex];
+          const isCorrect = selectedIndex === match.correct;
+          const selectedText = selectedIndex !== null
+            ? match.options[selectedIndex]
+            : "(no answer)";
+
+          return `
+            <li class="matching-row">
+              <div class="matching-prompt">${match.prompt}</div>
+              <div class="matching-line"></div>
+              <div class="matching-selected ${isCorrect ? "correct-answer" : "incorrect-answer"}">
+                ${selectedText}
+              </div>
+            </li>
+          `;
+        }).join("")}
+      </ul>
+    `;
+  }
+
+  return `
+    <ul class="options">
+      ${answer.options.map((option, optionIndex) => {
+
+        const isCorrect =
+          answer.correctIndices.includes(optionIndex);
+
+        const isSelected =
+          answer.selectedIndices.includes(optionIndex);
+
+        const optionClasses = ["option", "result-option"];
+
+        // Correct answer styling
+        if (isCorrect) {
+          optionClasses.push("correct-answer");
+        }
+
+        // Wrong selected answer
+        if (isSelected && !isCorrect) {
+          optionClasses.push("incorrect-answer");
+        }
+
+        const markerClasses = ["result-marker", answer.type];
+
+        if (isSelected) {
+          markerClasses.push("result-marker-selected");
+        }
+
+        return `
+
+          <li class="${optionClasses.join(" ")}">
+
+            <span class="${markerClasses.join(" ")}"></span>
+
+            <span>
+              ${option}
+            </span>
+
+          </li>
+        `;
+
+      }).join("")}
+    </ul>
+  `;
+}
+
+function getQuestionType(question) {
+  return question.type || "multi-choice";
+}
+
+function getQuestionTypeLabel(question) {
+  const questionType = getQuestionType(question);
+
+  if (questionType === "multi-answer") {
+    return "Multiple answer";
+  }
+
+  if (questionType === "matching") {
+    return "Matching";
+  }
+
+  return "Multiple choice";
+}
+
+function getQuestionPoints(question) {
+  if (typeof question.points === "number") {
+    return question.points;
+  }
+
+  if (getQuestionType(question) === "matching") {
+    return question.matches.length;
+  }
+
+  if (Array.isArray(question.correct)) {
+    return question.correct.length;
+  }
+
+  return 1;
+}
+
+function getCorrectIndices(question) {
+  if (getQuestionType(question) === "matching") {
+    return [];
+  }
+
+  return Array.isArray(question.correct)
+    ? question.correct
+    : [question.correct];
+}
+
+function getSelectedAnswer(question, index) {
+  if (getQuestionType(question) === "matching") {
+    return question.matches.map((match, matchIndex) => {
+      const select = document.querySelector(
+        `select[name="question-${index}-match-${matchIndex}"]`
+      );
+
+      return select && select.value !== ""
+        ? Number(select.value)
+        : null;
+    });
+  }
+
+  return Array.from(
+    document.querySelectorAll(`input[name="question-${index}"]:checked`)
+  ).map((input) => Number(input.value));
+}
+
+function scoreQuestion(question, selectedAnswer) {
+  const questionType = getQuestionType(question);
+  const points = getQuestionPoints(question);
+  const correctIndices = getCorrectIndices(question);
+  let earnedPoints = 0;
+  let selectedIndices = [];
+  let selectedMatches = [];
+
+  if (questionType === "multi-answer") {
+    selectedIndices = selectedAnswer;
+
+    const correctSelections = selectedIndices.filter((selectedIndex) => {
+      return correctIndices.includes(selectedIndex);
+    }).length;
+
+    const incorrectSelections = selectedIndices.length - correctSelections;
+    const rawScore = Math.max(correctSelections - incorrectSelections, 0);
+
+    earnedPoints = (rawScore / correctIndices.length) * points;
+  } else if (questionType === "matching") {
+    selectedMatches = selectedAnswer;
+
+    const correctMatches = question.matches.filter((match, matchIndex) => {
+      return selectedMatches[matchIndex] === match.correct;
+    }).length;
+
+    earnedPoints = (correctMatches / question.matches.length) * points;
+  } else {
+    selectedIndices = selectedAnswer;
+
+    if (selectedIndices[0] === correctIndices[0]) {
+      earnedPoints = points;
+    }
+  }
+
+  return {
+    correctIndices,
+    earnedPoints,
+    isCorrect: earnedPoints === points,
+    points,
+    selectedIndices,
+    selectedMatches
+  };
+}
+
+function formatPoints(points) {
+  return `${formatScore(points)} ${points === 1 ? "point" : "points"}`;
+}
+
+function formatScore(score) {
+  return Number.isInteger(score)
+    ? String(score)
+    : score.toFixed(1);
+}
+
+function renderCorrectAnswerText(answer) {
+  if (answer.type === "matching") {
+    return answer.matches.map((match) => {
+      return `${match.prompt}: ${match.options[match.correct]}`;
+    }).join("; ");
+  }
+
+  return answer.correctIndices.map((correctIndex) => {
+    return answer.options[correctIndex];
+  }).join(", ");
 }
