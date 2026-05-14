@@ -157,21 +157,8 @@ function showResults(score, answers) {
       ">
 
         <!-- Circle -->
-        <div style="
-          width:140px;
-          height:140px;
-          border-radius:50%;
-          border:12px solid #2b78c5;
-          border-top-color:#dfe3e6;
-          border-right-color:#dfe3e6;
-          display:flex;
-          align-items:center;
-          justify-content:center;
-          font-size:38px;
-          font-weight:bold;
-          color:#2d3b45;
-        ">
-          ${percentage}%
+        <div class="score-ring" id="score-ring" data-score="${percentage}">
+          <span class="score-ring-value" id="score-ring-value">0%</span>
         </div>
 
         <!-- Score -->
@@ -194,72 +181,36 @@ function showResults(score, answers) {
 
       </div>
 
-      <h2 style="
-        font-size:42px;
-        margin-bottom:40px;
-      ">
+      <h2 class="result-section-title">
         Questions
       </h2>
 
       ${answers.map((answer, index) => {
 
-        const userAnswer =
-          answer.selectedIndex !== null
-            ? answer.options[answer.selectedIndex]
-            : "(no answer)";
-
         return `
 
-          <div style="
-            border-top:1px solid #dfe3e6;
-            padding-top:30px;
-            margin-top:30px;
-          ">
+          <div class="question" id="q${index}">
 
             <!-- Header -->
-            <div style="
-              display:flex;
-              align-items:center;
-              gap:20px;
-              margin-bottom:25px;
-            ">
+            <div class="question-header">
 
-              <div style="
-                background:#2d3b45;
-                color:white;
-                width:50px;
-                height:42px;
-                display:flex;
-                align-items:center;
-                justify-content:center;
-                font-weight:bold;
-                font-size:22px;
-              ">
-                ${index + 1}
-              </div>
+              <div class="question-meta">
+                <div class="question-num">${index + 1}</div>
 
-              <div style="
-                font-size:22px;
-                color:#6b7780;
-              ">
-                ${answer.correct ? "1 / 1 point" : "0 / 1 point"}
-                &nbsp;&nbsp;
-                Multiple choice
+                <div class="question-type-pts">
+                  Multiple choice &nbsp;|&nbsp; ${answer.correct ? "1 / 1" : "0 / 1"} point
+                </div>
               </div>
 
             </div>
 
             <!-- Question -->
-            <div style="
-              font-size:28px;
-              margin-bottom:30px;
-              line-height:1.4;
-            ">
+            <p class="question-text">
               ${answer.question}
-            </div>
+            </p>
 
             <!-- Options -->
-            <div>
+            <ul class="options">
 
               ${answer.options.map((option, optionIndex) => {
 
@@ -269,84 +220,45 @@ function showResults(score, answers) {
                 const isSelected =
                   optionIndex === answer.selectedIndex;
 
-                let style = `
-                  border:2px solid #dfe3e6;
-                  padding:18px 20px;
-                  border-radius:6px;
-                  margin-bottom:16px;
-                  font-size:22px;
-                `;
+                const optionClasses = ["option", "result-option"];
 
                 // Correct answer styling
                 if (isCorrect) {
-                  style += `
-                    border-color:#0b8f3a;
-                    background:#f3fff6;
-                  `;
+                  optionClasses.push("correct-answer");
                 }
 
                 // Wrong selected answer
                 if (isSelected && !isCorrect) {
-                  style += `
-                    border-color:#d93025;
-                    background:#fff5f5;
-                  `;
+                  optionClasses.push("incorrect-answer");
+                }
+
+                const radioClasses = ["result-radio"];
+
+                if (isSelected) {
+                  radioClasses.push("result-radio-selected");
                 }
 
                 return `
 
-                  <div style="${style}">
+                  <li class="${optionClasses.join(" ")}">
 
-                    <div style="
-                      display:flex;
-                      align-items:center;
-                      gap:16px;
-                    ">
+                    <span class="${radioClasses.join(" ")}"></span>
 
-                      <div style="
-                        width:24px;
-                        height:24px;
-                        border-radius:50%;
-                        border:3px solid #6b7780;
-                        position:relative;
-                        flex-shrink:0;
-                      ">
+                    <span>
+                      ${option}
+                    </span>
 
-                        ${isSelected ? `
-                          <div style="
-                            width:12px;
-                            height:12px;
-                            border-radius:50%;
-                            background:#2d3b45;
-                            position:absolute;
-                            top:50%;
-                            left:50%;
-                            transform:translate(-50%, -50%);
-                          "></div>
-                        ` : ""}
-
-                      </div>
-
-                      <div>
-                        ${option}
-                      </div>
-
-                    </div>
-
-                  </div>
+                  </li>
                 `;
 
               }).join("")}
 
-            </div>
+            </ul>
 
             <!-- Incorrect message -->
             ${!answer.correct ? `
 
-              <div style="
-                margin-top:18px;
-                font-size:22px;
-              ">
+              <div class="result-feedback">
 
                 <span style="
                   color:#d93025;
@@ -364,16 +276,13 @@ function showResults(score, answers) {
 
             ` : `
 
-              <div style="
-                margin-top:18px;
-                font-size:22px;
-                color:#0b8f3a;
-                font-weight:bold;
-              ">
+              <div class="result-feedback correct">
                 Correct
               </div>
 
             `}
+
+            <hr class="question-separator">
 
           </div>
         `;
@@ -384,7 +293,37 @@ function showResults(score, answers) {
   `;
 
   main.innerHTML = resultsHTML;
+  window.scrollTo(0, 0);
+  animateScoreRing(percentage);
 
-  // Hide sidebar after results
-  document.querySelector(".sidebar").style.display = "none";
+}
+
+function animateScoreRing(percentage) {
+
+  const ring = document.getElementById("score-ring");
+  const value = document.getElementById("score-ring-value");
+
+  if (!ring || !value) {
+    return;
+  }
+
+  const duration = 1000;
+  const startTime = performance.now();
+
+  function updateFrame(currentTime) {
+
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const easedProgress = 1 - Math.pow(1 - progress, 3);
+    const currentScore = percentage * easedProgress;
+
+    ring.style.setProperty("--score-progress", `${currentScore}%`);
+    value.textContent = `${Math.round(currentScore)}%`;
+
+    if (progress < 1) {
+      requestAnimationFrame(updateFrame);
+    }
+  }
+
+  requestAnimationFrame(updateFrame);
 }

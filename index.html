@@ -20,7 +20,7 @@
 
   .top-bar {
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 0; left: 110px; right: 0;
     height: 52px;
     background: #fff;
     border-bottom: 1px solid #c7cdd1;
@@ -38,9 +38,9 @@
   }
 
   .rocket-icon {
-    width: 32px;
-    height: 32px;
-    color: #6b2c91;
+    width: 30px;
+    height: 30px;
+    color: #2d3b45;
   }
 
   .top-bar-actions {
@@ -72,39 +72,118 @@
     font-family: inherit;
   }
 
-  .sidebar {
+  .global-nav {
     position: fixed;
-    top: 52px;
+    top: 0;
     left: 0;
     bottom: 0;
-    width: 52px;
+    width: 50px;
+    background: #2d0f3f;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 120;
+  }
+
+  .global-logo {
+    width: 50px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: Georgia, serif;
+    font-size: 30px;
+  }
+
+  .global-icon {
+    width: 50px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    position: relative;
+  }
+
+  .global-icon svg {
+    width: 25px;
+    height: 25px;
+    stroke: currentColor;
+  }
+
+  .global-icon.active {
+    background: #fff;
+    color: #6b2c91;
+  }
+
+  .global-badge {
+    position: absolute;
+    top: 10px;
+    right: 7px;
+    width: 23px;
+    height: 23px;
+    border-radius: 50%;
+    background: #f1c232;
+    color: #1f2933;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: bold;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 50px;
+    bottom: 0;
+    width: 60px;
     background: #fff;
     border-right: 1px solid #c7cdd1;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 8px;
+    padding-top: 0;
     overflow-y: auto;
+    z-index: 110;
   }
 
-  .sidebar-divider {
-    width: 32px;
-    border: none;
-    border-top: 1px solid #c7cdd1;
-    margin: 6px 0;
+  .sidebar-tool {
+    width: 60px;
+    height: 52px;
+    border-bottom: 1px solid #e1e7ea;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2d3b45;
+  }
+
+  .sidebar-tool.active {
+    background: #eef0f2;
+  }
+
+  .sidebar-tool svg {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+  }
+
+  #sidebar-questions {
+    width: 100%;
   }
 
   .sidebar-num {
-    width: 36px;
+    width: 60px;
     height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    border-bottom: 1px solid #e1e7ea;
+    font-size: 16px;
+    font-weight: bold;
     color: #2d3b45;
     cursor: pointer;
-    border-radius: 4px;
-    margin-bottom: 2px;
   }
 
   .sidebar-num:hover {
@@ -114,7 +193,7 @@
 
   .main {
     margin-top: 52px;
-    margin-left: 52px;
+    margin-left: 110px;
     padding: 32px 24px;
     flex: 1;
   }
@@ -231,19 +310,164 @@
     font-size: 18px;
     font-weight: bold;
   }
+
+  .score-ring {
+    --score-progress: 0%;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: conic-gradient(
+      #2b78c5 var(--score-progress),
+      #dfe3e6 var(--score-progress)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+  }
+
+  .score-ring::before {
+    content: "";
+    width: 116px;
+    height: 116px;
+    border-radius: 50%;
+    background: #fff;
+    position: absolute;
+  }
+
+  .score-ring-value {
+    color: #2d3b45;
+    font-size: 38px;
+    font-weight: bold;
+    position: relative;
+    z-index: 1;
+  }
+
+  .result-section-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 24px;
+  }
+
+  .result-option {
+    border: 1px solid #dfe3e6;
+    border-radius: 4px;
+    cursor: default;
+    padding: 10px 12px;
+  }
+
+  .result-option.correct-answer {
+    border-color: #0b8f3a;
+    background: #f3fff6;
+  }
+
+  .result-option.incorrect-answer {
+    border-color: #d93025;
+    background: #fff5f5;
+  }
+
+  .result-radio {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #6b7780;
+    position: relative;
+    flex-shrink: 0;
+  }
+
+  .result-radio-selected::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #2d3b45;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .result-feedback {
+    margin-top: 14px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
 </style>
 </head>
 
 <body>
 
-<!-- Top Bar -->
-<div class="top-bar">
-  <div class="top-bar-left">
-    <svg class="rocket-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-      <path stroke-linecap="round" stroke-linejoin="round"
-      d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 3.61a14.98 14.98 0 00-2.56 6.16"/>
+<!-- Global Navigation -->
+<nav class="global-nav" aria-label="Global navigation">
+  <div class="global-logo">M</div>
+
+  <div class="global-icon" title="Account">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <circle cx="12" cy="8" r="4"></circle>
+      <path d="M4 21a8 8 0 0 1 16 0"></path>
     </svg>
   </div>
+
+  <div class="global-icon" title="Dashboard">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <path d="M4 13a8 8 0 0 1 16 0"></path>
+      <path d="M12 13l4-4"></path>
+      <path d="M4 13h3"></path>
+      <path d="M17 13h3"></path>
+    </svg>
+  </div>
+
+  <div class="global-icon active" title="Courses">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <path d="M5 4h14v16H5z"></path>
+      <path d="M8 8h8"></path>
+      <path d="M8 12h6"></path>
+    </svg>
+  </div>
+
+  <div class="global-icon" title="Calendar">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <rect x="4" y="5" width="16" height="16" rx="1"></rect>
+      <path d="M8 3v4"></path>
+      <path d="M16 3v4"></path>
+      <path d="M4 10h16"></path>
+    </svg>
+  </div>
+
+  <div class="global-icon" title="Inbox">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <path d="M4 6h16v12H4z"></path>
+      <path d="M4 8l8 6 8-6"></path>
+    </svg>
+    <span class="global-badge">16</span>
+  </div>
+
+  <div class="global-icon" title="History">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M12 7v6l4 2"></path>
+    </svg>
+  </div>
+
+  <div class="global-icon" title="Search">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <circle cx="10" cy="10" r="6"></circle>
+      <path d="M15 15l5 5"></path>
+    </svg>
+  </div>
+
+  <div class="global-icon" title="Help">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <circle cx="12" cy="12" r="9"></circle>
+      <path d="M9.5 9a2.5 2.5 0 1 1 4.1 1.9c-.9.6-1.6 1.2-1.6 2.6"></path>
+      <path d="M12 17h.01"></path>
+    </svg>
+  </div>
+</nav>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="top-bar-left"></div>
 
   <div class="top-bar-actions">
     <button class="btn-return" onclick="location.reload()">Return</button>
@@ -253,7 +477,36 @@
 
 <!-- Sidebar -->
 <div class="sidebar">
-  <hr class="sidebar-divider">
+  <div class="sidebar-tool" title="Quiz">
+    <svg class="rocket-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+      <path stroke-linecap="round" stroke-linejoin="round"
+      d="M15.59 14.37a6 6 0 01-5.84 7.38v-4.82m5.84-2.56a14.98 14.98 0 006.16-12.12A14.98 14.98 0 009.63 3.61a14.98 14.98 0 00-2.56 6.16"/>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M7.07 9.77L3 13.84l4.82.7"></path>
+      <path stroke-linecap="round" stroke-linejoin="round" d="M14.23 16.93L10.16 21l-.7-4.82"></path>
+    </svg>
+  </div>
+
+  <div class="sidebar-tool" title="Collapse">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <path d="M4 12h13"></path>
+      <path d="M13 8l4 4-4 4"></path>
+    </svg>
+  </div>
+
+  <div class="sidebar-tool active" title="Pinned">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <path d="M14 4l6 6"></path>
+      <path d="M12 6l6 6-4 1-5 5-3-3 5-5z"></path>
+    </svg>
+  </div>
+
+  <div class="sidebar-tool" title="Details">
+    <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+      <path d="M6 4h12v16H6z"></path>
+      <path d="M9 8h6"></path>
+    </svg>
+  </div>
+
   <div id="sidebar-questions"></div>
 </div>
 
