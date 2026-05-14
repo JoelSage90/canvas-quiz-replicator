@@ -42,9 +42,7 @@ QUIZ_DATA.questions.forEach((question, index) => {
 
     </div>
 
-    <p class="question-text">
-      ${question.text}
-    </p>
+    ${renderQuestionText(question, index)}
 
     ${renderQuestionInputs(question, index)}
 
@@ -78,6 +76,9 @@ document.getElementById("submit-btn").addEventListener("click", () => {
       earnedPoints: result.earnedPoints,
       options: question.options || [],
       matches: question.matches || [],
+      gapKeys: result.gapKeys,
+      gapAnswers: result.gapAnswers,
+      selectedGaps: result.selectedGaps,
       correctIndices: result.correctIndices,
       selectedIndices: result.selectedIndices,
       selectedMatches: result.selectedMatches,
@@ -182,10 +183,7 @@ function showResults(score, answers) {
 
             </div>
 
-            <!-- Question -->
-            <p class="question-text">
-              ${answer.question}
-            </p>
+            ${renderAnswerQuestionText(answer)}
 
             ${renderAnswerReview(answer)}
 
@@ -194,12 +192,12 @@ function showResults(score, answers) {
 
               <div class="result-feedback">
 
-	                <span style="
-	                  color:${answer.earnedPoints > 0 ? "#b36b00" : "#d93025"};
-	                  font-weight:bold;
+                <span style="
+                  color:${answer.earnedPoints > 0 ? "#b36b00" : "#d93025"};
+                  font-weight:bold;
                 ">
                   ${answer.earnedPoints > 0 ? "Partially correct" : "Incorrect"}
-	                </span>
+                </span>
 
                 <br><br>
 
@@ -262,8 +260,38 @@ function animateScoreRing(percentage) {
   requestAnimationFrame(updateFrame);
 }
 
+function renderQuestionText(question, questionIndex) {
+  if (getQuestionType(question) !== "fill-gap") {
+    return `
+      <p class="question-text">
+        ${question.text}
+      </p>
+    `;
+  }
+
+  return `
+    <p class="fill-gap-text">
+      ${question.text.replace(/\{([^}]+)\}/g, (match, key) => {
+        return `
+          <input
+            class="fill-gap-input"
+            type="text"
+            name="question-${questionIndex}-gap-${key}"
+            placeholder="${key}"
+            autocomplete="off"
+          >
+        `;
+      })}
+    </p>
+  `;
+}
+
 function renderQuestionInputs(question, questionIndex) {
   const questionType = getQuestionType(question);
+
+  if (questionType === "fill-gap") {
+    return "";
+  }
 
   if (questionType === "matching") {
     return `
@@ -321,6 +349,26 @@ function renderQuestionInputs(question, questionIndex) {
 }
 
 function renderAnswerReview(answer) {
+  if (answer.type === "fill-gap") {
+    return `
+      <ul class="fill-gap-review">
+        ${answer.gapKeys.map((gapKey) => {
+          const selectedValue = answer.selectedGaps[gapKey] || "(no answer)";
+          const isCorrect = normaliseAnswer(selectedValue) === normaliseAnswer(answer.gapAnswers[gapKey]);
+
+          return `
+            <li class="fill-gap-review-item">
+              <span class="fill-gap-label">${gapKey}:</span>
+              <span class="fill-gap-answer ${isCorrect ? "correct-answer" : "incorrect-answer"}">
+                ${selectedValue}
+              </span>
+            </li>
+          `;
+        }).join("")}
+      </ul>
+    `;
+  }
+
   if (answer.type === "matching") {
     return `
       <ul class="matching-list">
@@ -398,6 +446,10 @@ function getQuestionType(question) {
 function getQuestionTypeLabel(question) {
   const questionType = getQuestionType(question);
 
+  if (questionType === "fill-gap") {
+    return "Fill in the gaps";
+  }
+
   if (questionType === "multi-answer") {
     return "Multiple answer";
   }
@@ -418,6 +470,10 @@ function getQuestionPoints(question) {
     return question.matches.length;
   }
 
+  if (getQuestionType(question) === "fill-gap") {
+    return Object.keys(question.answers).length;
+  }
+
   if (Array.isArray(question.correct)) {
     return question.correct.length;
   }
@@ -426,7 +482,7 @@ function getQuestionPoints(question) {
 }
 
 function getCorrectIndices(question) {
-  if (getQuestionType(question) === "matching") {
+  if (getQuestionType(question) === "matching" || getQuestionType(question) === "fill-gap") {
     return [];
   }
 
@@ -436,6 +492,20 @@ function getCorrectIndices(question) {
 }
 
 function getSelectedAnswer(question, index) {
+  if (getQuestionType(question) === "fill-gap") {
+    return getGapKeys(question).reduce((selectedGaps, gapKey) => {
+      const input = document.querySelector(
+        `input[name="question-${index}-gap-${gapKey}"]`
+      );
+
+      selectedGaps[gapKey] = input
+        ? input.value.trim()
+        : "";
+
+      return selectedGaps;
+    }, {});
+  }
+
   if (getQuestionType(question) === "matching") {
     return question.matches.map((match, matchIndex) => {
       const select = document.querySelector(
@@ -458,10 +528,23 @@ function scoreQuestion(question, selectedAnswer) {
   const points = getQuestionPoints(question);
   const correctIndices = getCorrectIndices(question);
   let earnedPoints = 0;
+  let gapKeys = [];
+  let gapAnswers = {};
   let selectedIndices = [];
   let selectedMatches = [];
+  let selectedGaps = {};
 
-  if (questionType === "multi-answer") {
+  if (questionType === "fill-gap") {
+    gapKeys = getGapKeys(question);
+    gapAnswers = question.answers;
+    selectedGaps = selectedAnswer;
+
+    const correctGaps = gapKeys.filter((gapKey) => {
+      return normaliseAnswer(selectedGaps[gapKey]) === normaliseAnswer(gapAnswers[gapKey]);
+    }).length;
+
+    earnedPoints = (correctGaps / gapKeys.length) * points;
+  } else if (questionType === "multi-answer") {
     selectedIndices = selectedAnswer;
 
     const correctSelections = selectedIndices.filter((selectedIndex) => {
@@ -491,8 +574,11 @@ function scoreQuestion(question, selectedAnswer) {
   return {
     correctIndices,
     earnedPoints,
+    gapAnswers,
+    gapKeys,
     isCorrect: earnedPoints === points,
     points,
+    selectedGaps,
     selectedIndices,
     selectedMatches
   };
@@ -509,6 +595,12 @@ function formatScore(score) {
 }
 
 function renderCorrectAnswerText(answer) {
+  if (answer.type === "fill-gap") {
+    return answer.gapKeys.map((gapKey) => {
+      return `${gapKey}: ${answer.gapAnswers[gapKey]}`;
+    }).join("; ");
+  }
+
   if (answer.type === "matching") {
     return answer.matches.map((match) => {
       return `${match.prompt}: ${match.options[match.correct]}`;
@@ -518,4 +610,27 @@ function renderCorrectAnswerText(answer) {
   return answer.correctIndices.map((correctIndex) => {
     return answer.options[correctIndex];
   }).join(", ");
+}
+
+function renderAnswerQuestionText(answer) {
+  return `
+    <p class="question-text">
+      ${answer.question}
+    </p>
+  `;
+}
+
+function getGapKeys(question) {
+  const keys = [];
+
+  question.text.replace(/\{([^}]+)\}/g, (match, key) => {
+    keys.push(key);
+    return match;
+  });
+
+  return keys;
+}
+
+function normaliseAnswer(answer) {
+  return String(answer).trim().toLowerCase();
 }

@@ -109,6 +109,20 @@ const QUIZ_DATA = {
       ],
 
       points: 3
+    },
+
+    {
+      type: "fill-gap",
+      text:
+        "In the Week 9 architecture, the {word_1} class retrieves timeline data, the {word_2} class represents individual posts, and the {word_3} class is used to publish new content.",
+
+      answers: {
+        word_1: "Timelines",
+        word_2: "Status",
+        word_3: "Statuses"
+      },
+
+      points: 3
     }
   ]
 };
