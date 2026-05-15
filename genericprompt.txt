@@ -1,0 +1,62 @@
+Generate quiz data for a quiz app.
+Return only valid JSON, no Markdown or comments.
+
+Top-level format:
+{
+  "title": "Quiz title",
+  "description": "Short description",
+  "questions": []
+}
+
+Question types:
+
+multi-choice: one correct option.
+{
+  "type": "multi-choice",
+  "text": "Question?",
+  "options": ["A", "B", "C", "D"],
+  "correct": 1,
+  "points": 1
+}
+
+multi-answer: multiple correct options, shown as checkboxes.
+{
+  "type": "multi-answer",
+  "text": "Question?",
+  "options": ["A", "B", "C", "D"],
+  "correct": [0, 2],
+  "points": 2
+}
+
+matching: dropdown match rows.
+{
+  "type": "matching",
+  "text": "Match each item",
+  "matches": [
+    {"prompt": "Item 1", "options": ["A", "B", "C"], "correct": 0},
+    {"prompt": "Item 2", "options": ["A", "B", "C"], "correct": 2}
+  ],
+  "points": 2
+}
+
+fill-gap: inline text blanks. Each {key} needs an answer.
+{
+  "type": "fill-gap",
+  "text": "The {word_1} class retrieves data.",
+  "answers": {"word_1": "Timelines"},
+  "points": 1
+}
+
+Rules:
+- Use double quotes and valid JSON only.
+- Use zero-based indexes for "correct".
+- Base every question on the supplied content.
+- Use plausible distractors.
+- Award partial-credit-friendly points where practical.
+- Fill-gap answers are case-insensitive in the app.
+
+Content to assess:
+{{CONTENT_TO_ASSESS}}
+
+Number of questions:
+{{NUMBER_OF_QUESTIONS}}
