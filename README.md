@@ -1,32 +1,23 @@
 # Canvas Quiz Replicator
 
-A small static web app that recreates a Canvas-style quiz experience. It renders quiz questions from a JavaScript data file, lets users answer different question types, and shows a results page with the final score and correct answers.
+A small static web app that recreates a Canvas-style quiz experience. Users can paste quiz JSON, upload a JSON file, take the quiz, and view a marked results page.
 
-## What It Does
+![Landing page](images/landing-page.png)
 
-- Displays a quiz title, description, and several question types.
-- Shows a fixed top bar with `Return` and `Submit` controls.
-- Shows a left sidebar with numbered question shortcuts.
-- Supports multiple choice, multiple answer, matching, and fill-in-the-gap questions.
-- Calculates the final score when the quiz is submitted.
-- Displays a results view with:
-  - Percentage score
-  - Points earned
-  - Each submitted answer
-  - Correct and incorrect answer highlighting
+## How To Use The Website
 
-## Project Structure
+1. Open the website in a browser.
+2. On the start page, download the prompt by clicking `this prompt`.
+3. Use that prompt with your notes in any AI model.
+4. Copy the JSON output from the AI model.
+5. Paste the JSON into the text box, or upload it as a `.json` file.
+6. Click `Begin`.
+7. Answer the quiz questions.
+8. Click `Submit` to see your score and the correct answers.
 
-```text
-.
-├── index.html      # Page markup, layout, and CSS styles
-├── questions.json  # Quiz title, description, questions, options, and answers
-└── script.js       # Rendering logic, sidebar navigation, scoring, and results UI
-```
+## Running Locally
 
-## How To Run It
-
-This project does not require a build step or package manager. Because quiz data is loaded from `questions.json`, run it with a simple local server from the project folder:
+This project does not need a build step or package manager. From the project folder, start a simple local server:
 
 ```bash
 python3 -m http.server 8000
@@ -38,25 +29,52 @@ Then visit:
 http://localhost:8000
 ```
 
-## Editing The Quiz
+You can also open `index.html` directly in a browser, but using a local server is usually smoother for linked files and downloads.
 
-Quiz content lives in `questions.json`.
+## Creating Quiz Questions
 
-The quiz is configured as JSON:
+The landing page includes a link to [genericprompt.txt](genericprompt.txt). Download it and use it with your notes in an AI model.
+
+The AI model should return JSON in this shape:
 
 ```json
 {
-  "title": "Weeks 1 and 2",
-  "description": "Questions to test your knowledge",
-  "questions": [
-    {}
-  ]
+  "title": "Quiz title",
+  "description": "Short description",
+  "questions": []
 }
 ```
 
-Each question should include a `type`, `text`, and `points` value. Supported question types are:
+Once you have the JSON, paste it into the website or upload it as a `.json` file.
 
-## Question Types
+## Taking The Quiz
+
+After you click `Begin`, the app renders the quiz using the JSON you provided.
+
+![Quiz page](images/quiz-page.png)
+
+The left sidebar shows numbered shortcuts for each question. The app supports:
+
+- Multiple choice questions
+- Multiple answer questions
+- Matching questions
+- Fill-in-the-gap questions
+
+## Viewing Results
+
+When you click `Submit`, the app marks the quiz and shows your results.
+
+![Results page](images/results-page.png)
+
+The results page shows:
+
+- Percentage score
+- Points earned
+- Each submitted answer
+- Correct and incorrect answer highlighting
+- Correct answers for missed questions
+
+## JSON Question Types
 
 ### Multiple Choice
 
@@ -66,107 +84,74 @@ Use `type: "multi-choice"` when there is one correct answer. The `correct` value
 {
   "type": "multi-choice",
   "text": "Which command is used to stage changes in Git before committing?",
-  "options": [
-    "git push",
-    "git add",
-    "git stage",
-    "git save"
-  ],
+  "options": ["git push", "git add", "git stage", "git save"],
   "correct": 1,
   "points": 1
 }
 ```
 
-Index values start at `0`, so `correct: 1` means the second option.
-
 ### Multiple Answer
 
-Use `type: "multi-answer"` when more than one option is correct. The `correct` value is an array of zero-based option indexes. These questions render as square checkboxes.
+Use `type: "multi-answer"` when more than one option is correct. The `correct` value is an array of zero-based option indexes.
 
 ```json
 {
   "type": "multi-answer",
-  "text": "Which of the following are useful Git commands for inspecting repository state?",
-  "options": [
-    "git status",
-    "git commit",
-    "git log",
-    "git diff",
-    "git delete-history"
-  ],
+  "text": "Which commands are useful for inspecting repository state?",
+  "options": ["git status", "git commit", "git log", "git diff"],
   "correct": [0, 2, 3],
   "points": 3
 }
 ```
 
-Multiple-answer questions use negative marking:
-
-- Correct selections add credit.
-- Incorrect selections subtract credit.
-- The score cannot go below `0`.
-- Partial marks are awarded based on the number of correct answers.
-
 ### Matching
 
-Use `type: "matching"` when the user should match prompts to dropdown answers. Each item in `matches` has a `prompt`, a list of dropdown `options`, and a `correct` index.
+Use `type: "matching"` when the user should match prompts to dropdown answers.
 
 ```json
 {
   "type": "matching",
-  "text": "Match the capability with the generation of C++ that introduced it",
+  "text": "Match each item",
   "matches": [
     {
       "prompt": "Classes",
-      "options": [
-        "C++11",
-        "Pre-standard C++",
-        "C++98"
-      ],
+      "options": ["C++11", "Pre-standard C++", "C++98"],
       "correct": 1
-    },
-    {
-      "prompt": "Generic programming and templates",
-      "options": [
-        "C++11",
-        "Pre-standard C++",
-        "C++98"
-      ],
-      "correct": 2
     }
   ],
-  "points": 2
+  "points": 1
 }
 ```
 
-Matching questions award partial credit per correctly matched row.
-
 ### Fill In The Gaps
 
-Use `type: "fill-gap"` when the question text contains missing keywords. Add placeholders in the text using braces, such as `{word_1}`, then provide the correct answers in the `answers` object using the same keys.
+Use `type: "fill-gap"` when the question text contains missing keywords. Add placeholders in the text using braces, then provide answers with matching keys.
 
 ```json
 {
   "type": "fill-gap",
-  "text": "In the Week 9 architecture, the {word_1} class retrieves timeline data, the {word_2} class represents individual posts, and the {word_3} class is used to publish new content.",
+  "text": "The {word_1} class retrieves timeline data.",
   "answers": {
-    "word_1": "Timelines",
-    "word_2": "Status",
-    "word_3": "Statuses"
+    "word_1": "Timelines"
   },
-  "points": 3
+  "points": 1
 }
 ```
 
-Fill-gap answers are not case sensitive, so `timelines`, `Timelines`, and `TIMELINES` are treated as the same answer. Whitespace at the start or end is ignored.
+Fill-gap answers are case-insensitive, and extra whitespace is ignored.
 
-Fill-gap questions award partial credit per correctly completed gap.
+## Project Structure
 
-## Current Limitations
-
-- Quiz data is stored locally in `questions.json`.
-- Results are not saved after the page is refreshed.
-- There is no backend or Canvas API integration.
+```text
+.
+├── images/            # README screenshots
+├── genericprompt.txt  # Prompt users can download to generate quiz JSON
+├── index.html         # Page markup
+├── questions.json     # Example quiz JSON
+├── script.js          # Landing page, quiz rendering, scoring, and results logic
+└── styles.css         # App styles
+```
 
 ## Notes
 
-Because the app renders quiz text and answers into the page, only use trusted content in `questions.json`. If quiz data is later loaded from users or an external API, the rendering logic should be updated to avoid inserting untrusted HTML directly.
+The app renders the supplied JSON into the page. Use trusted quiz content, especially if sharing JSON from other people.
