@@ -1,64 +1,99 @@
 // script.js
 
-document.getElementById("quiz-title").textContent = QUIZ_DATA.title;
-document.getElementById("quiz-description").textContent = QUIZ_DATA.description;
+const QUESTIONS_URL = "questions.json";
 
 const questionsContainer = document.getElementById("questions-container");
 const sidebarContainer = document.getElementById("sidebar-questions");
-const totalPoints = QUIZ_DATA.questions.reduce((total, question) => {
-  return total + getQuestionPoints(question);
-}, 0);
+let QUIZ_DATA = null;
+let totalPoints = 0;
 
-QUIZ_DATA.questions.forEach((question, index) => {
+initQuiz();
 
-  // Sidebar numbers
-  const sideNum = document.createElement("div");
-  sideNum.className = "sidebar-num";
-  sideNum.textContent = index + 1;
+async function initQuiz() {
+  try {
+    QUIZ_DATA = await loadQuizData();
 
-  sideNum.addEventListener("click", () => {
-    document.getElementById(`q${index}`).scrollIntoView({
-      behavior: "smooth"
+    document.getElementById("quiz-title").textContent = QUIZ_DATA.title;
+    document.getElementById("quiz-description").textContent = QUIZ_DATA.description;
+
+    totalPoints = QUIZ_DATA.questions.reduce((total, question) => {
+      return total + getQuestionPoints(question);
+    }, 0);
+
+    renderQuestions();
+
+    document.getElementById("submit-btn").addEventListener("click", submitQuiz);
+  } catch (error) {
+    questionsContainer.innerHTML = `
+      <div class="result-feedback incorrect">
+        Quiz data could not be loaded. Start a local server and make sure questions.json is available.
+      </div>
+    `;
+    console.error(error);
+  }
+}
+
+async function loadQuizData() {
+  const response = await fetch(QUESTIONS_URL);
+
+  if (!response.ok) {
+    throw new Error(`Could not load ${QUESTIONS_URL}`);
+  }
+
+  return response.json();
+}
+
+function renderQuestions() {
+  QUIZ_DATA.questions.forEach((question, index) => {
+
+    // Sidebar numbers
+    const sideNum = document.createElement("div");
+    sideNum.className = "sidebar-num";
+    sideNum.textContent = index + 1;
+
+    sideNum.addEventListener("click", () => {
+      document.getElementById(`q${index}`).scrollIntoView({
+        behavior: "smooth"
+      });
     });
-  });
 
-  sidebarContainer.appendChild(sideNum);
+    sidebarContainer.appendChild(sideNum);
 
-  const questionDiv = document.createElement("div");
+    const questionDiv = document.createElement("div");
 
-  questionDiv.className = "question";
-  questionDiv.id = `q${index}`;
+    questionDiv.className = "question";
+    questionDiv.id = `q${index}`;
 
-  questionDiv.innerHTML = `
-    <div class="question-header">
+    questionDiv.innerHTML = `
+      <div class="question-header">
 
-      <div class="question-meta">
-        <div class="question-num">${index + 1}</div>
+        <div class="question-meta">
+          <div class="question-num">${index + 1}</div>
 
-        <div class="question-type-pts">
-          ${getQuestionTypeLabel(question)} &nbsp;|&nbsp; ${formatPoints(getQuestionPoints(question))}
+          <div class="question-type-pts">
+            ${getQuestionTypeLabel(question)} &nbsp;|&nbsp; ${formatPoints(getQuestionPoints(question))}
+          </div>
         </div>
+
       </div>
 
-    </div>
+      ${renderQuestionText(question, index)}
 
-    ${renderQuestionText(question, index)}
+      ${renderQuestionInputs(question, index)}
 
-    ${renderQuestionInputs(question, index)}
+      <hr class="question-separator">
+    `;
 
-    <hr class="question-separator">
-  `;
-
-  questionsContainer.appendChild(questionDiv);
-});
+    questionsContainer.appendChild(questionDiv);
+  });
+}
 
 
 // =======================================
 // SUBMIT QUIZ
 // =======================================
 
-document.getElementById("submit-btn").addEventListener("click", () => {
-
+function submitQuiz() {
   let score = 0;
 
   const answers = [];
@@ -89,7 +124,7 @@ document.getElementById("submit-btn").addEventListener("click", () => {
   });
 
   showResults(score, answers);
-});
+}
 
 
 // =======================================
