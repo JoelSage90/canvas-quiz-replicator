@@ -20,21 +20,13 @@ A small static web app that recreates a Canvas-style quiz experience. It renders
 ```text
 .
 ├── index.html      # Page markup, layout, and CSS styles
-├── questions.js    # Quiz title, description, questions, options, and answers
+├── questions.json  # Quiz title, description, questions, options, and answers
 └── script.js       # Rendering logic, sidebar navigation, scoring, and results UI
 ```
 
 ## How To Run It
 
-This project does not require a build step, package manager, or server.
-
-Open `index.html` directly in a web browser:
-
-```text
-index.html
-```
-
-You can also run a simple local server from the project folder if you prefer:
+This project does not require a build step or package manager. Because quiz data is loaded from `questions.json`, run it with a simple local server from the project folder:
 
 ```bash
 python3 -m http.server 8000
@@ -48,18 +40,18 @@ http://localhost:8000
 
 ## Editing The Quiz
 
-Quiz content lives in `questions.js`.
+Quiz content lives in `questions.json`.
 
-The quiz is configured through the `QUIZ_DATA` object:
+The quiz is configured as JSON:
 
-```js
-const QUIZ_DATA = {
-  title: "Weeks 1 and 2",
-  description: "Questions to test your knowledge",
-  questions: [
-    // question objects go here
+```json
+{
+  "title": "Weeks 1 and 2",
+  "description": "Questions to test your knowledge",
+  "questions": [
+    {}
   ]
-};
+}
 ```
 
 Each question should include a `type`, `text`, and `points` value. Supported question types are:
@@ -70,18 +62,18 @@ Each question should include a `type`, `text`, and `points` value. Supported que
 
 Use `type: "multi-choice"` when there is one correct answer. The `correct` value is the zero-based index of the correct option.
 
-```js
+```json
 {
-  type: "multi-choice",
-  text: "Which command is used to stage changes in Git before committing?",
-  options: [
+  "type": "multi-choice",
+  "text": "Which command is used to stage changes in Git before committing?",
+  "options": [
     "git push",
     "git add",
     "git stage",
     "git save"
   ],
-  correct: 1,
-  points: 1
+  "correct": 1,
+  "points": 1
 }
 ```
 
@@ -91,19 +83,19 @@ Index values start at `0`, so `correct: 1` means the second option.
 
 Use `type: "multi-answer"` when more than one option is correct. The `correct` value is an array of zero-based option indexes. These questions render as square checkboxes.
 
-```js
+```json
 {
-  type: "multi-answer",
-  text: "Which of the following are useful Git commands for inspecting repository state?",
-  options: [
+  "type": "multi-answer",
+  "text": "Which of the following are useful Git commands for inspecting repository state?",
+  "options": [
     "git status",
     "git commit",
     "git log",
     "git diff",
     "git delete-history"
   ],
-  correct: [0, 2, 3],
-  points: 3
+  "correct": [0, 2, 3],
+  "points": 3
 }
 ```
 
@@ -118,31 +110,31 @@ Multiple-answer questions use negative marking:
 
 Use `type: "matching"` when the user should match prompts to dropdown answers. Each item in `matches` has a `prompt`, a list of dropdown `options`, and a `correct` index.
 
-```js
+```json
 {
-  type: "matching",
-  text: "Match the capability with the generation of C++ that introduced it",
-  matches: [
+  "type": "matching",
+  "text": "Match the capability with the generation of C++ that introduced it",
+  "matches": [
     {
-      prompt: "Classes",
-      options: [
+      "prompt": "Classes",
+      "options": [
         "C++11",
         "Pre-standard C++",
         "C++98"
       ],
-      correct: 1
+      "correct": 1
     },
     {
-      prompt: "Generic programming and templates",
-      options: [
+      "prompt": "Generic programming and templates",
+      "options": [
         "C++11",
         "Pre-standard C++",
         "C++98"
       ],
-      correct: 2
+      "correct": 2
     }
   ],
-  points: 2
+  "points": 2
 }
 ```
 
@@ -152,17 +144,16 @@ Matching questions award partial credit per correctly matched row.
 
 Use `type: "fill-gap"` when the question text contains missing keywords. Add placeholders in the text using braces, such as `{word_1}`, then provide the correct answers in the `answers` object using the same keys.
 
-```js
+```json
 {
-  type: "fill-gap",
-  text:
-    "In the Week 9 architecture, the {word_1} class retrieves timeline data, the {word_2} class represents individual posts, and the {word_3} class is used to publish new content.",
-  answers: {
-    word_1: "Timelines",
-    word_2: "Status",
-    word_3: "Statuses"
+  "type": "fill-gap",
+  "text": "In the Week 9 architecture, the {word_1} class retrieves timeline data, the {word_2} class represents individual posts, and the {word_3} class is used to publish new content.",
+  "answers": {
+    "word_1": "Timelines",
+    "word_2": "Status",
+    "word_3": "Statuses"
   },
-  points: 3
+  "points": 3
 }
 ```
 
@@ -172,10 +163,10 @@ Fill-gap questions award partial credit per correctly completed gap.
 
 ## Current Limitations
 
-- Quiz data is stored locally in `questions.js`.
+- Quiz data is stored locally in `questions.json`.
 - Results are not saved after the page is refreshed.
 - There is no backend or Canvas API integration.
 
 ## Notes
 
-Because the app renders quiz text and answers into the page, only use trusted content in `questions.js`. If quiz data is later loaded from users or an external API, the rendering logic should be updated to avoid inserting untrusted HTML directly.
+Because the app renders quiz text and answers into the page, only use trusted content in `questions.json`. If quiz data is later loaded from users or an external API, the rendering logic should be updated to avoid inserting untrusted HTML directly.
