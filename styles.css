@@ -514,6 +514,24 @@ body {
   gap: 18px;
 }
 
+.prompt-helper {
+  background: #f8fafb;
+  border: 1px solid #e1e7ea;
+  border-radius: 4px;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 14px 16px;
+}
+
+.prompt-link {
+  color: #0770a3;
+  font-weight: bold;
+}
+
+.prompt-link:hover {
+  color: #055f8b;
+}
+
 .json-input {
   width: 100%;
   min-height: 260px;

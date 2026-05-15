@@ -18,6 +18,14 @@ function initLandingPage() {
 
   landingContainer.innerHTML = `
     <div class="landing-form">
+      <p class="prompt-helper">
+        To generate quiz questions, use
+        <a class="prompt-link" href="genericprompt.txt" download>
+          this prompt
+        </a>
+        along with your notes in any AI model, then paste or upload the output JSON here.
+      </p>
+
       <textarea
         class="json-input"
         id="json-input"

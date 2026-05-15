@@ -1,5 +1,4 @@
 Generate quiz data for a quiz app.
-Return only valid JSON, no Markdown or comments.
 
 Top-level format:
 {
