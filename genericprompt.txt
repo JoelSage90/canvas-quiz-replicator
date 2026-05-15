@@ -1,5 +1,13 @@
 Generate quiz data for a quiz app.
 
+Content to assess:
+{{CONTENT_TO_ASSESS}}
+
+Number of questions:
+{{NUMBER_OF_QUESTIONS}}
+
+how to return:
+
 Top-level format:
 {
   "title": "Quiz title",
@@ -54,8 +62,3 @@ Rules:
 - Award partial-credit-friendly points where practical.
 - Fill-gap answers are case-insensitive in the app.
 
-Content to assess:
-{{CONTENT_TO_ASSESS}}
-
-Number of questions:
-{{NUMBER_OF_QUESTIONS}}
