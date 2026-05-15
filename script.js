@@ -1,46 +1,192 @@
 // script.js
 
-const QUESTIONS_URL = "questions.json";
-
+const landingContainer = document.getElementById("landing-container");
 const questionsContainer = document.getElementById("questions-container");
 const sidebarContainer = document.getElementById("sidebar-questions");
+const submitButton = document.getElementById("submit-btn");
 let QUIZ_DATA = null;
 let totalPoints = 0;
 
-initQuiz();
+initLandingPage();
 
-async function initQuiz() {
-  try {
-    QUIZ_DATA = await loadQuizData();
+function initLandingPage() {
+  document.getElementById("quiz-title").textContent = "Create quiz";
+  document.getElementById("quiz-description").textContent = "Paste your quiz JSON below or upload a JSON file to begin.";
+  questionsContainer.innerHTML = "";
+  sidebarContainer.innerHTML = "";
+  submitButton.hidden = true;
 
-    document.getElementById("quiz-title").textContent = QUIZ_DATA.title;
-    document.getElementById("quiz-description").textContent = QUIZ_DATA.description;
+  landingContainer.innerHTML = `
+    <div class="landing-form">
+      <textarea
+        class="json-input"
+        id="json-input"
+        spellcheck="false"
+        placeholder='{
+  "title": "Quiz title",
+  "description": "Quiz description",
+  "questions": []
+}'
+      ></textarea>
 
-    totalPoints = QUIZ_DATA.questions.reduce((total, question) => {
-      return total + getQuestionPoints(question);
-    }, 0);
+      <label class="upload-dropzone" id="upload-dropzone" for="json-file">
+        <span class="upload-primary" id="upload-primary">Drag and drop a JSON file here</span>
+        <span class="upload-secondary" id="upload-secondary">or click to choose one</span>
+        <input class="file-input" id="json-file" type="file" accept=".json,application/json">
+      </label>
 
-    renderQuestions();
+      <div class="landing-error" id="landing-error" role="alert"></div>
 
-    document.getElementById("submit-btn").addEventListener("click", submitQuiz);
-  } catch (error) {
-    questionsContainer.innerHTML = `
-      <div class="result-feedback incorrect">
-        Quiz data could not be loaded. Start a local server and make sure questions.json is available.
+      <div class="landing-actions">
+        <button class="btn-submit" id="begin-btn">Begin</button>
       </div>
-    `;
+    </div>
+  `;
+
+  const jsonInput = document.getElementById("json-input");
+  const fileInput = document.getElementById("json-file");
+  const dropzone = document.getElementById("upload-dropzone");
+  const beginButton = document.getElementById("begin-btn");
+
+  beginButton.addEventListener("click", () => {
+    beginQuizFromJson(jsonInput.value);
+  });
+
+  fileInput.addEventListener("change", () => {
+    if (fileInput.files.length > 0) {
+      loadJsonFile(fileInput.files[0]);
+    }
+  });
+
+  ["dragenter", "dragover"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.add("drag-over");
+    });
+  });
+
+  ["dragleave", "drop"].forEach((eventName) => {
+    dropzone.addEventListener(eventName, (event) => {
+      event.preventDefault();
+      dropzone.classList.remove("drag-over");
+    });
+  });
+
+  dropzone.addEventListener("drop", (event) => {
+    const file = event.dataTransfer.files[0];
+
+    if (file) {
+      loadJsonFile(file);
+    }
+  });
+}
+
+function beginQuizFromJson(jsonText) {
+  const errorContainer = document.getElementById("landing-error");
+
+  try {
+    const quizData = JSON.parse(jsonText);
+    validateQuizData(quizData);
+    renderQuiz(quizData);
+  } catch (error) {
+    errorContainer.textContent = error.message;
     console.error(error);
   }
 }
 
-async function loadQuizData() {
-  const response = await fetch(QUESTIONS_URL);
+async function loadJsonFile(file) {
+  const jsonInput = document.getElementById("json-input");
+  const uploadPrimary = document.getElementById("upload-primary");
+  const uploadSecondary = document.getElementById("upload-secondary");
+  const errorContainer = document.getElementById("landing-error");
 
-  if (!response.ok) {
-    throw new Error(`Could not load ${QUESTIONS_URL}`);
+  try {
+    const fileText = await file.text();
+    jsonInput.value = fileText;
+    uploadPrimary.textContent = file.name;
+    uploadSecondary.textContent = "File loaded. Click Begin to create the quiz.";
+    errorContainer.textContent = "";
+  } catch (error) {
+    errorContainer.textContent = "That file could not be read. Please try another JSON file.";
+    console.error(error);
+  }
+}
+
+function renderQuiz(quizData) {
+  QUIZ_DATA = quizData;
+  totalPoints = QUIZ_DATA.questions.reduce((total, question) => {
+    return total + getQuestionPoints(question);
+  }, 0);
+
+  document.getElementById("quiz-title").textContent = QUIZ_DATA.title;
+  document.getElementById("quiz-description").textContent = QUIZ_DATA.description;
+  landingContainer.innerHTML = "";
+  questionsContainer.innerHTML = "";
+  sidebarContainer.innerHTML = "";
+  submitButton.hidden = false;
+
+  renderQuestions();
+  submitButton.removeEventListener("click", submitQuiz);
+  submitButton.addEventListener("click", submitQuiz);
+  window.scrollTo(0, 0);
+}
+
+function validateQuizData(quizData) {
+  if (!quizData || typeof quizData !== "object") {
+    throw new Error("The JSON must be an object.");
   }
 
-  return response.json();
+  if (typeof quizData.title !== "string" || quizData.title.trim() === "") {
+    throw new Error("The quiz JSON needs a title.");
+  }
+
+  if (typeof quizData.description !== "string") {
+    throw new Error("The quiz JSON needs a description.");
+  }
+
+  if (!Array.isArray(quizData.questions) || quizData.questions.length === 0) {
+    throw new Error("The quiz JSON needs at least one question.");
+  }
+
+  quizData.questions.forEach((question, index) => {
+    validateQuestion(question, index);
+  });
+}
+
+function validateQuestion(question, index) {
+  if (!question || typeof question !== "object") {
+    throw new Error(`Question ${index + 1} must be an object.`);
+  }
+
+  if (typeof question.text !== "string" || question.text.trim() === "") {
+    throw new Error(`Question ${index + 1} needs question text.`);
+  }
+
+  const questionType = getQuestionType(question);
+
+  if (questionType === "fill-gap") {
+    if (!question.answers || typeof question.answers !== "object") {
+      throw new Error(`Question ${index + 1} needs answers for its gaps.`);
+    }
+
+    return;
+  }
+
+  if (questionType === "matching") {
+    if (!Array.isArray(question.matches) || question.matches.length === 0) {
+      throw new Error(`Question ${index + 1} needs matching rows.`);
+    }
+
+    return;
+  }
+
+  if (!Array.isArray(question.options) || question.options.length === 0) {
+    throw new Error(`Question ${index + 1} needs answer options.`);
+  }
+
+  if (question.correct === undefined) {
+    throw new Error(`Question ${index + 1} needs a correct answer.`);
+  }
 }
 
 function renderQuestions() {
