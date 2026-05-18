@@ -176,11 +176,28 @@ body {
   font-weight: bold;
   color: #2d3b45;
   cursor: pointer;
+  position: relative;
+  overflow: hidden;
 }
 
 .sidebar-num:hover {
   background: #e8f4fb;
   color: #0770a3;
+}
+
+.sidebar-status-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #2d3b45;
+  position: absolute;
+  left: -7px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.sidebar-num-complete .sidebar-status-dot {
+  display: none;
 }
 
 .main {
