@@ -1,0 +1,186 @@
+{
+  "title": "Software Engineering Concepts Test",
+  "description": "A challenging 15-question multiple choice test covering MVC, Spring architecture, testing, REST, APIs, and external service integration.",
+  "questions": [
+    {
+      "type": "multi-choice",
+      "text": "Why is the Service layer important in Spring layered architecture?",
+      "options": [
+        "It replaces the database entirely",
+        "It ensures controllers directly manipulate the database",
+        "It separates business logic from request handling",
+        "It automatically generates HTML pages"
+      ],
+      "correct": 2,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which scenario best demonstrates a violation of the MVC pattern?",
+      "options": [
+        "A controller updating model data based on user input",
+        "A view displaying data from multiple models",
+        "A view directly querying the database",
+        "A service layer validating business rules"
+      ],
+      "correct": 2,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Why are derived query methods in Spring Data repositories useful?",
+      "options": [
+        "They eliminate the need for databases",
+        "They automatically generate queries from method names",
+        "They convert REST APIs into SOAP services",
+        "They prevent validation errors"
+      ],
+      "correct": 1,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the primary risk of placing business logic directly inside controllers?",
+      "options": [
+        "Reduced separation of concerns and maintainability",
+        "Automatic deletion of database entries",
+        "Controllers become unable to process requests",
+        "REST APIs stop being stateless"
+      ],
+      "correct": 0,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which example best represents an edge case in software testing?",
+      "options": [
+        "Testing a login with valid credentials",
+        "Testing a list sorting algorithm with one million items",
+        "Testing an age field with the minimum allowed value",
+        "Testing an API endpoint during normal usage"
+      ],
+      "correct": 2,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the role of BindingResult in Spring validation?",
+      "options": [
+        "Stores database transaction logs",
+        "Handles REST authentication",
+        "Contains the results of validation checks",
+        "Automatically fixes invalid data"
+      ],
+      "correct": 2,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "A flaky test caused by execution order dependency most likely occurs because:",
+      "options": [
+        "Tests share mutable state",
+        "The compiler optimizes code incorrectly",
+        "The database schema is invalid",
+        "The REST API uses JSON"
+      ],
+      "correct": 0,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which testing approach specifically designs tests using knowledge of internal code structure?",
+      "options": [
+        "Black-box testing",
+        "Acceptance testing",
+        "White-box testing",
+        "Regression testing"
+      ],
+      "correct": 2,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Why is exhaustive testing considered impossible?",
+      "options": [
+        "Modern software cannot be tested",
+        "There can be an extremely large or infinite number of input combinations",
+        "Unit tests replace all other testing",
+        "Static testing prevents dynamic testing"
+      ],
+      "correct": 1,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which REST constraint improves scalability by ensuring requests contain all necessary information?",
+      "options": [
+        "Caching",
+        "Uniform interface",
+        "Layered structure",
+        "Statelessness"
+      ],
+      "correct": 3,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which HTTP operation is typically considered idempotent?",
+      "options": [
+        "POST creating a new resource",
+        "GET retrieving a resource",
+        "POST submitting payment data",
+        "PATCH partially updating data"
+      ],
+      "correct": 1,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the main trade-off introduced by REST caching?",
+      "options": [
+        "Higher CPU usage but lower memory usage",
+        "Improved performance but potentially stale data",
+        "Reduced scalability but improved reliability",
+        "More accurate validation but slower responses"
+      ],
+      "correct": 1,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Why should external APIs be evaluated for documentation quality and rate limits before integration?",
+      "options": [
+        "To ensure the API can fit system requirements and remain maintainable",
+        "Because APIs automatically replace databases",
+        "To avoid using authentication",
+        "Because poor documentation improves security"
+      ],
+      "correct": 0,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "In the Mastodon integration example, why is a separate service used instead of having controllers communicate directly with Mastodon?",
+      "options": [
+        "Controllers cannot call APIs",
+        "To maintain separation of concerns and isolate API communication",
+        "Because REST APIs only work in repositories",
+        "To prevent models from storing data"
+      ],
+      "correct": 1,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which statement best describes HATEOAS in REST architecture?",
+      "options": [
+        "Clients should dynamically discover actions using links in responses",
+        "REST APIs must always use XML representations",
+        "Every resource must have a separate database",
+        "Clients should store session state on the server"
+      ],
+      "correct": 0,
+      "points": 2
+    }
+  ]
+}

@@ -202,8 +202,13 @@ function renderQuestions() {
 
     // Sidebar numbers
     const sideNum = document.createElement("div");
-    sideNum.className = "sidebar-num";
-    sideNum.textContent = index + 1;
+    sideNum.className = "sidebar-num sidebar-num-incomplete";
+    sideNum.id = `sidebar-q${index}`;
+    sideNum.setAttribute("aria-label", `Question ${index + 1} not completed`);
+    sideNum.innerHTML = `
+      <span class="sidebar-status-dot" aria-hidden="true"></span>
+      <span class="sidebar-num-label">${index + 1}</span>
+    `;
 
     sideNum.addEventListener("click", () => {
       document.getElementById(`q${index}`).scrollIntoView({
@@ -239,7 +244,51 @@ function renderQuestions() {
     `;
 
     questionsContainer.appendChild(questionDiv);
+    questionDiv.addEventListener("change", () => {
+      updateQuestionCompletion(index);
+    });
+    questionDiv.addEventListener("input", () => {
+      updateQuestionCompletion(index);
+    });
+    updateQuestionCompletion(index);
   });
+}
+
+function updateQuestionCompletion(index) {
+  const sideNum = document.getElementById(`sidebar-q${index}`);
+
+  if (!sideNum) {
+    return;
+  }
+
+  const completed = isQuestionCompleted(QUIZ_DATA.questions[index], index);
+  sideNum.classList.toggle("sidebar-num-incomplete", !completed);
+  sideNum.classList.toggle("sidebar-num-complete", completed);
+  sideNum.setAttribute(
+    "aria-label",
+    `Question ${index + 1} ${completed ? "completed" : "not completed"}`
+  );
+}
+
+function isQuestionCompleted(question, index) {
+  const questionType = getQuestionType(question);
+  const selectedAnswer = getSelectedAnswer(question, index);
+
+  if (questionType === "fill-gap") {
+    const gapKeys = getGapKeys(question);
+
+    return gapKeys.length > 0 && gapKeys.every((gapKey) => {
+      return selectedAnswer[gapKey] !== "";
+    });
+  }
+
+  if (questionType === "matching") {
+    return selectedAnswer.length > 0 && selectedAnswer.every((selectedMatch) => {
+      return selectedMatch !== null;
+    });
+  }
+
+  return selectedAnswer.length > 0;
 }
 
 

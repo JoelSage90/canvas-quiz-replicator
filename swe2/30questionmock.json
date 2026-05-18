@@ -1,0 +1,216 @@
+{
+  "title": "Software Engineering and Web Frameworks Quiz",
+  "description": "A 30-question multiple choice quiz based on MVC, Spring, REST APIs, testing, UI design, and external API integration.",
+  "questions": [
+    {
+      "type": "multi-choice",
+      "text": "In the MVC architecture, which component is responsible for managing application data?",
+      "options": ["View", "Controller", "Model", "Editor"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the main responsibility of the Controller in MVC?",
+      "options": ["Store database records", "Display UI elements", "Handle user input and manipulate the model", "Manage CSS styling"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which annotation marks a Java class as a database entity in Spring?",
+      "options": ["@Table", "@GeneratedValue", "@Entity", "@Id"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which Spring layer is responsible for handling business logic?",
+      "options": ["Controller", "Repository", "Service", "View"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What does CRUD stand for?",
+      "options": ["Create, Run, Update, Delete", "Create, Read, Update, Delete", "Control, Read, Upload, Delete", "Copy, Read, Use, Deploy"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which Spring feature automatically generates query methods from method names?",
+      "options": ["REST Controller", "Dependency Injection", "Derived Query Methods", "Spring Boot Starter"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "According to the Eight Golden Rules of Interface Design, what should happen after a user action is completed?",
+      "options": ["The application should restart", "The user should receive closure and feedback", "The database should reset", "The user should log in again"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is a dark pattern in UI design?",
+      "options": ["A low brightness interface", "A design that improves accessibility", "A deceptive interface technique that manipulates users", "A password-protected UI"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the purpose of specification by example?",
+      "options": ["Reduce database size", "Define requirements using concrete examples", "Generate CSS automatically", "Improve hardware performance"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which structure is commonly used in example-based specifications?",
+      "options": ["Input-Loop-Output", "Give-When-Then", "If-Else", "Compile-Link-Run"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Why are edge cases important in testing?",
+      "options": ["They improve internet speed", "They reduce code size", "Many bugs occur at boundaries and extremes", "They replace integration testing"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which annotation is used in Spring to trigger validation on request data?",
+      "options": ["@Autowired", "@Valid", "@Entity", "@PostMapping"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is a flaky test?",
+      "options": ["A test with no assertions", "A test that only runs once", "A test that sometimes passes and sometimes fails without code changes", "A test with syntax errors"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which testing level focuses on testing a single component in isolation?",
+      "options": ["System testing", "Integration testing", "Acceptance testing", "Unit testing"],
+      "correct": 3,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the main disadvantage of unit testing?",
+      "options": ["It is impossible to automate", "It cannot test component interactions", "It requires internet access", "It only works for databases"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which type of test double provides pre-programmed expectations of method calls?",
+      "options": ["Dummy", "Fake", "Stub", "Mock"],
+      "correct": 3,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What does REST stand for?",
+      "options": ["Remote Execution State Transfer", "Representational State Transfer", "Resource Exchange Service Technology", "Representation Exchange Standard Transfer"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Why are REST systems described as stateless?",
+      "options": ["The server stores all client sessions", "Requests contain all information needed", "The client stores all databases", "The server cannot process POST requests"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which HTTP verb is typically used to retrieve data?",
+      "options": ["POST", "DELETE", "PUT", "GET"],
+      "correct": 3,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is idempotence in REST?",
+      "options": ["A request always fails", "A request changes the database every time", "Running the same request repeatedly has the same effect", "Only GET requests are allowed"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is a URI in REST?",
+      "options": ["A database transaction", "A unique identifier for a resource", "A validation method", "A Java interface"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is content negotiation in REST?",
+      "options": ["Compressing files on the server", "Choosing which database to query", "The client specifying the desired representation format", "Encrypting HTTP traffic"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What does HATEOAS encourage in REST APIs?",
+      "options": ["Removing hyperlinks from APIs", "Using only XML", "Including links to related resources and actions", "Disabling caching"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Why might developers choose to use an external API?",
+      "options": ["To avoid using databases", "To implement existing features instead of building them from scratch", "To remove MVC architecture", "To replace testing"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is geocoding?",
+      "options": ["Encrypting user passwords", "Converting addresses into coordinates", "Creating API tokens", "Compressing images"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Which practice is recommended when programming using examples from documentation?",
+      "options": ["Copy-paste blindly", "Ignore the documentation", "Understand and adapt the example", "Rewrite the API completely"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is a risk of relying on external APIs?",
+      "options": ["Guaranteed infinite scalability", "The API may fail or have usage limits", "The API removes the need for testing", "The API automatically fixes bugs"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the purpose of an API in software engineering?",
+      "options": ["To physically connect servers", "To allow software systems to communicate", "To replace user interfaces", "To store application logs"],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "In Mastodon integration, which class is used for retrieving social media feeds?",
+      "options": ["Statuses", "Status", "Timelines", "MastodonController"],
+      "correct": 2,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "What is the role of the Mastodon service layer in an MVC application?",
+      "options": ["Directly render HTML pages", "Communicate with Mastodon APIs separately from the controller", "Replace the database", "Handle CSS styling"],
+      "correct": 1,
+      "points": 1
+    }
+  ]
+}
