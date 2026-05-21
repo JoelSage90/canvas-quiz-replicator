@@ -518,7 +518,9 @@ function renderQuestionText(question, questionIndex) {
 
   return `
     <div class="fill-gap-text">
-      ${renderFillGapQuestionText(question, questionIndex)}
+      ${renderFormattedContent(question.text, {
+        renderGapInput: createGapInputRenderer(question, questionIndex)
+      })}
     </div>
   `;
 }
@@ -595,9 +597,9 @@ function renderAnswerReview(answer) {
 
           return `
             <li class="fill-gap-review-item">
-              <span class="fill-gap-label">${gapKey}:</span>
+              <span class="fill-gap-label">${escapeHtml(gapKey)}:</span>
               <span class="fill-gap-answer ${isCorrect ? "correct-answer" : "incorrect-answer"}">
-                ${selectedValue}
+                ${renderFormattedContent(selectedValue)}
               </span>
             </li>
           `;
@@ -858,6 +860,10 @@ function renderAnswerQuestionText(answer) {
 }
 
 function getGapKeys(question) {
+  if (question.answers && typeof question.answers === "object") {
+    return Object.keys(question.answers);
+  }
+
   const keys = [];
 
   question.text.replace(/\{([^}]+)\}/g, (match, key) => {
@@ -872,66 +878,74 @@ function normaliseAnswer(answer) {
   return String(answer).trim().toLowerCase();
 }
 
-function renderFillGapQuestionText(question, questionIndex) {
-  return question.text.split(/(\{[^}]+\})/g).map((part) => {
-    const gapMatch = part.match(/^\{([^}]+)\}$/);
+function createGapInputRenderer(question, questionIndex) {
+  const answerKeys = new Set(Object.keys(question.answers || {}));
 
-    if (!gapMatch) {
-      return renderFormattedContent(part);
+  return (key) => {
+    if (!answerKeys.has(key)) {
+      return null;
     }
 
-    const key = gapMatch[1];
-
-    return `
-      <input
-        class="fill-gap-input"
-        type="text"
-        name="question-${questionIndex}-gap-${escapeAttribute(key)}"
-        placeholder="${escapeAttribute(key)}"
-        autocomplete="off"
-      >
-    `;
-  }).join("");
+    return `<input class="fill-gap-input" type="text" name="question-${questionIndex}-gap-${escapeAttribute(key)}" placeholder="${escapeAttribute(key)}" autocomplete="off">`;
+  };
 }
 
-function renderFormattedContent(value) {
-  const escapedValue = escapeHtml(value).replace(/\r\n/g, "\n");
+function renderFormattedContent(value, options = {}) {
+  const rawValue = String(value).replace(/\r\n/g, "\n");
   const parts = [];
   const codeBlockPattern = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
   let lastIndex = 0;
   let match;
 
-  while ((match = codeBlockPattern.exec(escapedValue)) !== null) {
+  while ((match = codeBlockPattern.exec(rawValue)) !== null) {
     if (match.index > lastIndex) {
-      parts.push(renderFormattedText(escapedValue.slice(lastIndex, match.index)));
+      parts.push(renderFormattedText(rawValue.slice(lastIndex, match.index), options));
     }
 
     const language = match[1]
       ? ` language-${escapeAttribute(match[1])}`
       : "";
 
-    parts.push(`<pre class="formatted-code-block"><code class="${language.trim()}">${match[2]}</code></pre>`);
+    parts.push(`
+      <pre class="formatted-code-block"><code class="${language.trim()}">${renderEscapedWithGaps(match[2], options)}</code></pre>
+    `);
     lastIndex = codeBlockPattern.lastIndex;
   }
 
-  if (lastIndex < escapedValue.length) {
-    parts.push(renderFormattedText(escapedValue.slice(lastIndex)));
+  if (lastIndex < rawValue.length) {
+    parts.push(renderFormattedText(rawValue.slice(lastIndex), options));
   }
 
   return parts.join("");
 }
 
-function renderFormattedText(escapedText) {
-  return escapedText
+function renderFormattedText(rawText, options = {}) {
+  return rawText
     .split(/(`[^`\n]+`)/g)
     .map((part) => {
       if (part.startsWith("`") && part.endsWith("`")) {
-        return `<code class="formatted-inline-code">${part.slice(1, -1)}</code>`;
+        return `<code class="formatted-inline-code">${renderEscapedWithGaps(part.slice(1, -1), options)}</code>`;
       }
 
-      return part.replace(/\n/g, "<br>");
+      return renderEscapedWithGaps(part, options).replace(/\n/g, "<br>");
     })
     .join("");
+}
+
+function renderEscapedWithGaps(rawText, options = {}) {
+  return String(rawText).split(/(\{[^}]+\})/g).map((part) => {
+    const gapMatch = part.match(/^\{([^}]+)\}$/);
+
+    if (gapMatch && options.renderGapInput) {
+      const gapHtml = options.renderGapInput(gapMatch[1]);
+
+      if (gapHtml !== null) {
+        return gapHtml;
+      }
+    }
+
+    return escapeHtml(part);
+  }).join("");
 }
 
 function escapeHtml(value) {

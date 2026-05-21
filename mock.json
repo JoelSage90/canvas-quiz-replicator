@@ -1,0 +1,611 @@
+{
+  "title": "COMP26020 PLP Mock Exam Quiz",
+  "description": "A code-heavy 80 mark mock quiz covering C, compilation, C++, Haskell, Rust, and concurrency. Use the sidebar to track which questions are complete.",
+  "questions": [
+    {
+      "type": "multi-answer",
+      "text": "Part I \u2014 C (1.5 marks). Which statements correctly identify problems in this function?\n```c\n#include <stdlib.h>\n#include <string.h>\n\nchar *copy_label(const char *src) {\n    char *buf = malloc(strlen(src));\n    strcpy(buf, src);\n    return buf;\n}\n```",
+      "options": [
+        "The allocation is one byte too small because it does not reserve space for the terminating `\\0`.",
+        "The return value of `malloc` is not checked before `strcpy` writes through it.",
+        "The function must call `free(buf)` before returning to avoid a leak.",
+        "`strcpy` is safe here because `strlen(src)` gives exactly the number of visible characters.",
+        "If `src` is `NULL`, the call to `strlen(src)` is invalid before allocation even happens."
+      ],
+      "correct": [
+        0,
+        1,
+        4
+      ],
+      "points": 1.5
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part I \u2014 C (2 marks). Consider this code. Which statements are correct?\n```c\n#include <stdio.h>\n\nvoid touch(int a[4]) {\n    printf(\"%zu\\n\", sizeof(a));\n    a[4] = 99;\n}\n\nint main(void) {\n    int xs[4] = {1, 2, 3, 4};\n    touch(xs);\n}\n```",
+      "options": [
+        "Inside `touch`, the parameter `a` has effectively become an `int *`, so `sizeof(a)` is the size of a pointer, not the full array.",
+        "The write `a[4] = 99` is out of bounds because valid indexes are 0, 1, 2, and 3.",
+        "The array is copied by value into `touch`, so changes cannot affect the caller's array.",
+        "The notation `int a[4]` in the parameter list enforces a runtime length check of 4.",
+        "The call `touch(xs)` passes access to the original array's storage, not a deep copy of the array."
+      ],
+      "correct": [
+        0,
+        1,
+        4
+      ],
+      "points": 2
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part I \u2014 C (1.5 marks). Which statements are correct about this signed/unsigned comparison?\n```c\n#include <stdio.h>\n\nint main(void) {\n    int i = -1;\n    unsigned int u = 1;\n\n    if (i < u)\n        puts(\"less\");\n    else\n        puts(\"not less\");\n}\n```",
+      "options": [
+        "The comparison can convert `i` to an unsigned value before comparing.",
+        "On typical unsigned arithmetic, `-1` becomes a very large unsigned value, so `not less` is plausible.",
+        "This is always undefined behaviour simply because `i` is negative.",
+        "An explicit cast or avoiding mixed signed/unsigned comparison can make the programmer's intention clearer.",
+        "The compiler must compare the mathematical values -1 and 1 exactly as written."
+      ],
+      "correct": [
+        0,
+        1,
+        3
+      ],
+      "points": 1.5
+    },
+    {
+      "type": "matching",
+      "text": "Part I \u2014 C (2 marks). Match each code fragment to the best diagnosis.",
+      "matches": [
+        {
+          "prompt": "`int *p = malloc(sizeof *p); free(p); *p = 7;`",
+          "options": [
+            "Temporal safety: use-after-free",
+            "Spatial safety: buffer overflow/write out of bounds",
+            "Spatial safety: buffer overread/information leak",
+            "Build/link error: unresolved external symbol",
+            "No bug: valid bounded access"
+          ],
+          "correct": 0
+        },
+        {
+          "prompt": "`char b[4]; strcpy(b, \"abcdef\");`",
+          "options": [
+            "Temporal safety: use-after-free",
+            "Spatial safety: buffer overflow/write out of bounds",
+            "Spatial safety: buffer overread/information leak",
+            "Build/link error: unresolved external symbol",
+            "No bug: valid bounded access"
+          ],
+          "correct": 1
+        },
+        {
+          "prompt": "`char b[4] = {'a','b','c','d'}; printf(\"%s\", b);`",
+          "options": [
+            "Temporal safety: use-after-free",
+            "Spatial safety: buffer overflow/write out of bounds",
+            "Spatial safety: buffer overread/information leak",
+            "Build/link error: unresolved external symbol",
+            "No bug: valid bounded access"
+          ],
+          "correct": 2
+        },
+        {
+          "prompt": "`extern int f(void); int main(void){ return f(); }` compiled without the object file defining `f`",
+          "options": [
+            "Temporal safety: use-after-free",
+            "Spatial safety: buffer overflow/write out of bounds",
+            "Spatial safety: buffer overread/information leak",
+            "Build/link error: unresolved external symbol",
+            "No bug: valid bounded access"
+          ],
+          "correct": 3
+        }
+      ],
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Part II \u2014 Compilation (1 mark). The regex `(ab|a)*b` is used as a token pattern. Which input is accepted by the whole regex?",
+      "options": [
+        "`aba`",
+        "`aabb`",
+        "`ba`",
+        "`abbab`"
+      ],
+      "correct": 1,
+      "points": 1
+    },
+    {
+      "type": "multi-choice",
+      "text": "Part II \u2014 Compilation (2 marks). In subset construction, suppose the current DFA state is the NFA-state set `{0,2}`. You are given:\n\n- `move({0,2}, a) = {1,3}`\n- `\u03b5-closure({1,3}) = {1,3,4}`\n- `move({0,2}, b) = {2}`\n- `\u03b5-closure({2}) = {2,5}`\n\nWhat DFA transition should be recorded on input `a`?",
+      "options": [
+        "`{0,2} --a--> {1,3}`",
+        "`{0,2} --a--> {1,3,4}`",
+        "`{0,2} --a--> {2,5}`",
+        "`{1,3,4} --a--> {0,2}`"
+      ],
+      "correct": 1,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Part II \u2014 Compilation (2 marks). Consider this grammar.\n```text\nS -> if E then S else S\nS -> if E then S\nS -> id\n```\nWhy is this difficult for a predictive `LL(1)` parser without rewriting or extra disambiguation rules?",
+      "options": [
+        "Both `S` alternatives beginning with `if E then S` have the same initial lookahead sequence, so one token of lookahead cannot choose safely.",
+        "The grammar is regular, so it should be handled by the scanner rather than the parser.",
+        "The grammar has no terminals, so FIRST sets cannot be computed.",
+        "The grammar is bottom-up only because every grammar containing `else` is LR(1) but never LL(1)."
+      ],
+      "correct": 0,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Part II \u2014 Compilation (2 marks). Using shift-reduce parsing for this grammar and input, how many shifts and reductions are needed before accept?\n```text\nGrammar:\nS -> x S y\nS -> z\n\nInput:\nx z y\n```",
+      "options": [
+        "3 shifts and 1 reduction",
+        "3 shifts and 2 reductions",
+        "2 shifts and 3 reductions",
+        "4 shifts and 2 reductions"
+      ],
+      "correct": 1,
+      "points": 2
+    },
+    {
+      "type": "multi-choice",
+      "text": "Part II \u2014 Compilation (2 marks). A backend must implement `79 * x` without a multiply instruction. If shifts, adds, and subtracts each count as one basic operation, which implementation uses the fewest operations?",
+      "options": [
+        "`((x << 6) + (x << 4)) - x`, using 4 operations",
+        "`(x << 7) - (x << 5) - (x << 4) - x`, using 7 operations",
+        "`(x << 6) + (x << 3) + (x << 2) + x`, using 6 operations",
+        "`(x << 8) - (x << 7) - x`, using 5 operations"
+      ],
+      "correct": 0,
+      "points": 2
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part II \u2014 Compilation (2 marks). Given this source-level fragment, which statements about compiler stages are correct?\n```c\nint x;\nx = true + 3;\n```",
+      "options": [
+        "The scanner can split the input into tokens such as `int`, `x`, `=`, `true`, `+`, and `3`.",
+        "A syntax parser may accept the token order if the grammar permits assignment expressions.",
+        "The type error is normally a semantic-analysis issue, not a lexical-analysis issue.",
+        "A symbol table can be used to record that `x` has type `int`.",
+        "DFA minimisation is the phase that decides whether `true + 3` is type-correct."
+      ],
+      "correct": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "points": 2
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part II \u2014 Compilation (2 marks). Consider the three-address code below. At the point just before instruction 3 executes, which values must be live if instruction 4 is the final use of `c`?\n```text\n1: a = load A\n2: b = load B\n3: c = a + b\n4: print c\n5: d = load D\n6: print d\n```",
+      "options": [
+        "`a`",
+        "`b`",
+        "`c`",
+        "`d`",
+        "the address/value `A` loaded at line 1 is necessarily live after line 4"
+      ],
+      "correct": [
+        0,
+        1
+      ],
+      "points": 2
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part II \u2014 Compilation (2 marks). Which optimisations are valid for this IR if no variable except `z` and `w` is used later?\n```text\nx = 2 * 3\ny = x\nz = y + 4\nw = 2 * 3\n```",
+      "options": [
+        "Constant folding can replace `2 * 3` with `6`.",
+        "Copy propagation can replace the use of `y` with the value copied from `x`.",
+        "Dead-code elimination can remove assignments to `x` and `y` after their useful values have been propagated.",
+        "The optimiser may replace `z` by `w` because both originally mention `2 * 3`.",
+        "Optimisation is allowed to change the printed output if the target code is shorter."
+      ],
+      "correct": [
+        0,
+        1,
+        2
+      ],
+      "points": 2
+    },
+    {
+      "type": "matching",
+      "text": "Part II \u2014 Compilation (8 marks). Match each compiler concept to the best description.",
+      "matches": [
+        {
+          "prompt": "Turns a stream of characters into tokens such as identifiers, numbers, and operators.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 0
+        },
+        {
+          "prompt": "Checks whether the token sequence can be generated by the grammar and builds parse structure.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 1
+        },
+        {
+          "prompt": "Uses context such as types, declarations, and scopes to reject programs that parse but do not make sense.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 2
+        },
+        {
+          "prompt": "Target-neutral code form such as three-address code, used between frontend and backend.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 3
+        },
+        {
+          "prompt": "Replaces expressions like `3 + 4` with `7` when safe.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 4
+        },
+        {
+          "prompt": "Replaces later uses of a copied variable with the original value where safe.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 5
+        },
+        {
+          "prompt": "Stores a value in memory because there are not enough physical registers.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 6
+        },
+        {
+          "prompt": "Reorders instructions subject to dependencies to reduce latency or improve pipeline use.",
+          "options": [
+            "Lexical analysis",
+            "Syntax analysis",
+            "Semantic analysis",
+            "Intermediate representation",
+            "Constant folding",
+            "Copy propagation",
+            "Register spilling",
+            "Instruction scheduling"
+          ],
+          "correct": 7
+        }
+      ],
+      "points": 8
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part III \u2014 C++ (2 marks). This code intentionally avoids standard-library classes. Which statements are correct?\n```cpp\nclass Base {\npublic:\n    ~Base() {}\n    virtual int value() const { return 1; }\n};\n\nclass Derived : public Base {\n    int *data;\npublic:\n    Derived() : data(new int[8]) {}\n    ~Derived() { delete[] data; }\n    int value() const override { return 2; }\n};\n\nint main() {\n    Base *p = new Derived();\n    int n = p->value();\n    delete p;\n}\n```",
+      "options": [
+        "The call `p->value()` uses virtual dispatch and should call `Derived::value`.",
+        "Deleting a `Derived` object through `Base *` is unsafe here because `Base` does not have a virtual destructor.",
+        "The derived object acquires a heap resource in its constructor and attempts to release it in its destructor, which is an RAII-style pattern.",
+        "This code is safe because every class destructor is automatically virtual in C++.",
+        "Object slicing occurs at `Base *p = new Derived();` because the object is copied into a smaller `Base` object."
+      ],
+      "correct": [
+        0,
+        1,
+        2
+      ],
+      "points": 2
+    },
+    {
+      "type": "matching",
+      "text": "Part III \u2014 C++ (2 marks). Match each C++ feature to the best description.",
+      "matches": [
+        {
+          "prompt": "An alias that must be initialised and cannot normally be reseated to another object.",
+          "options": [
+            "Reference",
+            "Pointer",
+            "Constructor",
+            "Destructor",
+            "Virtual function"
+          ],
+          "correct": 0
+        },
+        {
+          "prompt": "An object that stores an address and may be null or reassigned.",
+          "options": [
+            "Reference",
+            "Pointer",
+            "Constructor",
+            "Destructor",
+            "Virtual function"
+          ],
+          "correct": 1
+        },
+        {
+          "prompt": "Special member function used to initialise an object when its lifetime begins.",
+          "options": [
+            "Reference",
+            "Pointer",
+            "Constructor",
+            "Destructor",
+            "Virtual function"
+          ],
+          "correct": 2
+        },
+        {
+          "prompt": "Special member function used to clean up when an object's lifetime ends.",
+          "options": [
+            "Reference",
+            "Pointer",
+            "Constructor",
+            "Destructor",
+            "Virtual function"
+          ],
+          "correct": 3
+        }
+      ],
+      "points": 2
+    },
+    {
+      "type": "matching",
+      "text": "Part III \u2014 C++ (3 marks). Match each fragment to the concept it mainly tests. No standard-library classes are needed.\n```cpp\nclass A { int x; public: virtual int f(){ return 1; } };\nclass B : public A { public: int f() override { return 2; } };\nint g(int);\ndouble g(double);\n```",
+      "matches": [
+        {
+          "prompt": "`A *p = new B; p->f();` chooses `B::f` through a base pointer.",
+          "options": [
+            "Compile-time overload resolution",
+            "Runtime virtual dispatch",
+            "Private by default",
+            "Stack lifetime / automatic destruction",
+            "Undefined because of dangling reference"
+          ],
+          "correct": 1
+        },
+        {
+          "prompt": "`g(3)` selects between `g(int)` and `g(double)` before runtime.",
+          "options": [
+            "Compile-time overload resolution",
+            "Runtime virtual dispatch",
+            "Private by default",
+            "Stack lifetime / automatic destruction",
+            "Undefined because of dangling reference"
+          ],
+          "correct": 0
+        },
+        {
+          "prompt": "In `class Hidden { int x; };`, member `x` cannot be accessed from outside unless access is changed.",
+          "options": [
+            "Compile-time overload resolution",
+            "Runtime virtual dispatch",
+            "Private by default",
+            "Stack lifetime / automatic destruction",
+            "Undefined because of dangling reference"
+          ],
+          "correct": 2
+        },
+        {
+          "prompt": "`{ B b; }` calls the relevant destructor chain when the block exits.",
+          "options": [
+            "Compile-time overload resolution",
+            "Runtime virtual dispatch",
+            "Private by default",
+            "Stack lifetime / automatic destruction",
+            "Undefined because of dangling reference"
+          ],
+          "correct": 3
+        },
+        {
+          "prompt": "`int& bad(){ int x = 4; return x; }` returns an alias to an object whose lifetime has ended.",
+          "options": [
+            "Compile-time overload resolution",
+            "Runtime virtual dispatch",
+            "Private by default",
+            "Stack lifetime / automatic destruction",
+            "Undefined because of dangling reference"
+          ],
+          "correct": 4
+        }
+      ],
+      "points": 3
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part IV \u2014 Haskell (2 marks). Which statements about Haskell IO are correct?",
+      "options": [
+        "`getLine` has type `IO String`.",
+        "You cannot generally turn an `IO String` directly into a pure `String`; you must sequence the action using `>>=` or `do` notation.",
+        "In Haskell, `return x` wraps `x` into an IO/action context; it does not exit the function like C/Java `return`.",
+        "`main` should normally be a pure `String` because the runtime prints its value automatically.",
+        "Inside `do`, `name <- getLine` binds the result produced by the IO action for use in later IO actions.",
+        "The bind operator has type `IO a -> (a -> b) -> IO b`, so the function after bind can return a pure value."
+      ],
+      "correct": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "points": 2
+    },
+    {
+      "type": "fill-gap",
+      "text": "Part IV \u2014 Haskell typing (3 marks). Fill the gaps in the type signatures. Use exactly the shown type-variable names.\n```haskell\napplyTwice f x = f (f x)\nsafeHead [] = Nothing\nsafeHead (x:_) = Just x\nsame x y = x == y\n\napplyTwice :: ({t1}) -> a -> a\nsafeHead :: {t2} -> Maybe a\nsame :: {t3} => a -> a -> Bool\n```",
+      "answers": {
+        "t1": "a -> a",
+        "t2": "[a]",
+        "t3": "Eq a"
+      },
+      "points": 3
+    },
+    {
+      "type": "fill-gap",
+      "text": "Part IV \u2014 Haskell strictness (3 marks). Write `bottom` for an expression that crashes, is undefined, or does not terminate.\n```haskell\nxs = [1, undefined, 3]\nys = 1 : undefined\n\na = head xs\nb = length xs\nc = length ys\n```\nThen `a` evaluates to {a_val}, `b` evaluates to {b_val}, and `c` evaluates to {c_val}.",
+      "answers": {
+        "a_val": "1",
+        "b_val": "3",
+        "c_val": "bottom"
+      },
+      "points": 3
+    },
+    {
+      "type": "fill-gap",
+      "text": "Part IV \u2014 Haskell recursive problem (12 marks). A stage decoration is either a light of one colour or a fork containing a left and right decoration. A decoration is symmetric when its left and right sides mirror each other exactly, including leaf colours.\n```haskell\ndata Colour = Red | Blue deriving (Eq, Show)\ndata Deco = Light Colour | Fork Deco Deco deriving (Eq, Show)\n```\nThree possible strategies are shown, as in the exam. In this JSON-app version, fill Program C only.\n\nPROGRAM A \u2014 direct recursive strategy\n```haskell\nmirrorEq (Light x) (Light y) = x == y\nmirrorEq (Fork a b) (Fork c d) = mirrorEq a d && mirrorEq b c\nmirrorEq _ _ = False\n\nsymmetric (Light _) = True\nsymmetric (Fork l r) = mirrorEq l r\n```\n\nPROGRAM B \u2014 coordinate strategy\n```haskell\n-- collect each leaf together with its path from the root,\n-- then compare every path with its opposite path.\n```\n\nPROGRAM C \u2014 convert the tree to a string and compare with its mirror\n```haskell\nmirrorChar '(' = {gap1}\nmirrorChar ')' = {gap2}\nmirrorChar c   = c\n\ndeco_to_string :: Deco -> String\ndeco_to_string (Light Red)  = \"r\"\ndeco_to_string (Light Blue) = \"b\"\ndeco_to_string (Fork l r) = {gap3} ++ deco_to_string l ++ deco_to_string r ++ {gap4}\n\nmirror_string :: String -> String\nmirror_string [] = []\nmirror_string (c:cs) = mirror_string cs ++ [{gap5} c]\n\nsymmetric :: Deco -> Bool\nsymmetric d = deco_to_string d == {gap6} (deco_to_string d)\n```",
+      "answers": {
+        "gap1": "')'",
+        "gap2": "'('",
+        "gap3": "\"(\"",
+        "gap4": "\")\"",
+        "gap5": "mirrorChar",
+        "gap6": "mirror_string"
+      },
+      "points": 12
+    },
+    {
+      "type": "multi-choice",
+      "text": "Part V \u2014 Advanced topics: Rust (3 marks). Consider the numbered Rust code. Which statement best describes the lifetime error?\n```rust\n1  fn main() {\n2      let r;\n3      {\n4          let x = String::from(\"hi\");\n5          r = &x;\n6          println!(\"{}\", r);\n7      }\n8      println!(\"{}\", r);\n9  }\n```",
+      "options": [
+        "`x` starts living at line 4 and is dropped at the end of the inner block after line 6, so using `r` at line 8 would dangle.",
+        "`x` starts living at line 5 because references create the object, and it lasts until line 8 because `r` needs it.",
+        "The code is valid because lifetime annotations can always extend `x` until the final `println!`.",
+        "The only issue is that `String::from` should be replaced by a string literal; the reference lifetime is otherwise valid."
+      ],
+      "correct": 0,
+      "points": 3
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part V \u2014 Advanced topics: Rust ownership (2 marks). Which statements are correct?\n```rust\nfn main() {\n    let s = String::from(\"abc\");\n    let t = s;\n    let u = t.clone();\n    println!(\"{}\", t);\n    println!(\"{}\", s);\n}\n```",
+      "options": [
+        "Ownership of the heap-allocated string is moved from `s` to `t` at `let t = s;`.",
+        "The `clone` creates a separate owned string for `u` rather than moving out of `t`.",
+        "The final `println!` using `s` is rejected because `s` was moved.",
+        "`String` behaves like `i32`, so assignment silently copies the whole value and both `s` and `t` remain owners of the same allocation.",
+        "After `let u = t.clone();`, `t` is always invalid because `clone` consumes its receiver."
+      ],
+      "correct": [
+        0,
+        1,
+        2
+      ],
+      "points": 2
+    },
+    {
+      "type": "multi-answer",
+      "text": "Part V \u2014 Advanced topics: Rust borrowing (2 marks). Which statements about this code are correct?\n```rust\nfn main() {\n    let mut s = String::from(\"hi\");\n\n    let a = &s;\n    let b = &s;\n    println!(\"{} {}\", a, b);\n\n    let c = &mut s;\n    c.push_str(\"!\");\n}\n```",
+      "options": [
+        "Having `a` and `b` as simultaneous immutable borrows is allowed.",
+        "The mutable borrow `c` is allowed after the last use of `a` and `b` under non-lexical lifetimes.",
+        "If `println!(\"{} {}\", a, b);` were moved after `let c = &mut s;`, the code would violate Rust's borrowing rules.",
+        "Rust allows any number of mutable borrows as long as they are not printed.",
+        "The variable `s` must be declared `mut` because `c.push_str` mutates the owned string through a mutable borrow."
+      ],
+      "correct": [
+        0,
+        1,
+        2,
+        4
+      ],
+      "points": 2
+    },
+    {
+      "type": "fill-gap",
+      "text": "Part V \u2014 Advanced topics: concurrency (4 marks). Fill the concurrency concepts.\n```java\n// Java example: code inside a Counter.inc() method.\n// The shared field is: int count = 0;\n\n// Looks like one source-level operation, but it is not atomic.\ncount++;\n```\nThe operation `count++` is really a read-modify-write sequence: first {step1} the old value, then {step2} the new value, then {step3} it back. If two threads do this without coordination and at least one access writes the shared variable, the bug is a {bug}.",
+      "answers": {
+        "step1": "read",
+        "step2": "compute",
+        "step3": "write",
+        "bug": "data race"
+      },
+      "points": 4
+    },
+    {
+      "type": "fill-gap",
+      "text": "Part V \u2014 Advanced topics: Java monitors (4 marks). Fill the missing monitor terms/code.\n```java\n// Java monitor sketch: code inside a synchronized take() method.\n// If the condition is false, the thread must wait.\n{loop_keyword} (item == null)\n    {wait_call}(); // releases the {released_thing} and sleeps\n\nint result = item;\nitem = null;\n{wake_call}(); // another thread's condition may now be true\nreturn result;\n```",
+      "answers": {
+        "loop_keyword": "while",
+        "wait_call": "wait",
+        "released_thing": "lock",
+        "wake_call": "notifyAll"
+      },
+      "points": 4
+    },
+    {
+      "type": "fill-gap",
+      "text": "Part V \u2014 Advanced topics: locks and protocols (4 marks). Fill the missing names.\n```java\n// Java ReentrantLock sketch: code inside deposit(int amount).\nlock.{pre_call}();       // preprotocol: acquire permission to enter\n// begin protected try block\nbalance += amount;       // {protected_region}: shared state update\n// cleanup block must always run, even after errors\n{cleanup_keyword}\nlock.{post_call}();      // postprotocol: release permission\n```",
+      "answers": {
+        "pre_call": "lock",
+        "protected_region": "critical section",
+        "cleanup_keyword": "finally",
+        "post_call": "unlock"
+      },
+      "points": 4
+    },
+    {
+      "type": "fill-gap",
+      "text": "Part V \u2014 Advanced topics: deadlock reasoning (4 marks). Fill the missing concepts.\n```java\n// Bad idea: different methods acquire the same two locks in different orders.\n// Thread 1: acquire A, then acquire B.\n// Thread 2: acquire B, then acquire A.\n```\nThis can cause {bug}. A common fix is to impose one global lock-acquisition {rule}. This breaks the Coffman condition called {condition}. The kind of correctness property violated is mainly {property}.",
+      "answers": {
+        "bug": "deadlock",
+        "rule": "order",
+        "condition": "circular wait",
+        "property": "liveness"
+      },
+      "points": 4
+    }
+  ]
+}

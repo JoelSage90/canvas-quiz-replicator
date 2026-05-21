@@ -284,8 +284,9 @@ body {
   line-height: 1.45;
   margin: 12px 0;
   overflow-x: auto;
+  overflow-wrap: anywhere;
   padding: 12px 14px;
-  white-space: pre;
+  white-space: pre-wrap;
 }
 
 .formatted-inline-code {
@@ -296,6 +297,11 @@ body {
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
   font-size: 0.95em;
   padding: 1px 4px;
+}
+
+.formatted-code-block .fill-gap-input {
+  font-family: inherit;
+  width: 110px;
 }
 
 .options {
