@@ -6,8 +6,15 @@ const sidebarContainer = document.getElementById("sidebar-questions");
 const submitButton = document.getElementById("submit-btn");
 let QUIZ_DATA = null;
 let totalPoints = 0;
+let mathTypesetPending = false;
 
 initLandingPage();
+
+window.addEventListener("load", () => {
+  if (mathTypesetPending) {
+    typesetMath();
+  }
+});
 
 function initLandingPage() {
   document.getElementById("quiz-title").textContent = "Create quiz";
@@ -137,6 +144,7 @@ function renderQuiz(quizData) {
   submitButton.removeEventListener("click", submitQuiz);
   submitButton.addEventListener("click", submitQuiz);
   window.scrollTo(0, 0);
+  typesetMath();
 }
 
 function validateQuizData(quizData) {
@@ -465,6 +473,7 @@ function showResults(score, answers) {
   main.innerHTML = resultsHTML;
   window.scrollTo(0, 0);
   animateScoreRing(percentage);
+  typesetMath();
 
 }
 
@@ -501,26 +510,16 @@ function animateScoreRing(percentage) {
 function renderQuestionText(question, questionIndex) {
   if (getQuestionType(question) !== "fill-gap") {
     return `
-      <p class="question-text">
-        ${question.text}
-      </p>
+      <div class="question-text">
+        ${renderFormattedContent(question.text)}
+      </div>
     `;
   }
 
   return `
-    <p class="fill-gap-text">
-      ${question.text.replace(/\{([^}]+)\}/g, (match, key) => {
-        return `
-          <input
-            class="fill-gap-input"
-            type="text"
-            name="question-${questionIndex}-gap-${key}"
-            placeholder="${key}"
-            autocomplete="off"
-          >
-        `;
-      })}
-    </p>
+    <div class="fill-gap-text">
+      ${renderFillGapQuestionText(question, questionIndex)}
+    </div>
   `;
 }
 
@@ -537,7 +536,7 @@ function renderQuestionInputs(question, questionIndex) {
         ${question.matches.map((match, matchIndex) => {
           return `
             <li class="matching-row">
-              <div class="matching-prompt">${match.prompt}</div>
+              <div class="matching-prompt">${renderFormattedContent(match.prompt)}</div>
               <div class="matching-line"></div>
               <select
                 class="matching-select"
@@ -548,7 +547,7 @@ function renderQuestionInputs(question, questionIndex) {
                 ${match.options.map((option, optionIndex) => {
                   return `
                     <option value="${optionIndex}">
-                      ${option}
+                      ${escapeHtml(option)}
                     </option>
                   `;
                 }).join("")}
@@ -577,7 +576,7 @@ function renderQuestionInputs(question, questionIndex) {
             >
 
             <label for="q${questionIndex}-o${optionIndex}">
-              ${option}
+              ${renderFormattedContent(option)}
             </label>
           </li>
         `;
@@ -619,10 +618,10 @@ function renderAnswerReview(answer) {
 
           return `
             <li class="matching-row">
-              <div class="matching-prompt">${match.prompt}</div>
+              <div class="matching-prompt">${renderFormattedContent(match.prompt)}</div>
               <div class="matching-line"></div>
               <div class="matching-selected ${isCorrect ? "correct-answer" : "incorrect-answer"}">
-                ${selectedText}
+                ${renderFormattedContent(selectedText)}
               </div>
             </li>
           `;
@@ -666,7 +665,7 @@ function renderAnswerReview(answer) {
             <span class="${markerClasses.join(" ")}"></span>
 
             <span>
-              ${option}
+              ${renderFormattedContent(option)}
             </span>
 
           </li>
@@ -835,26 +834,26 @@ function formatScore(score) {
 function renderCorrectAnswerText(answer) {
   if (answer.type === "fill-gap") {
     return answer.gapKeys.map((gapKey) => {
-      return `${gapKey}: ${answer.gapAnswers[gapKey]}`;
+      return `${escapeHtml(gapKey)}: ${renderFormattedContent(answer.gapAnswers[gapKey])}`;
     }).join("; ");
   }
 
   if (answer.type === "matching") {
     return answer.matches.map((match) => {
-      return `${match.prompt}: ${match.options[match.correct]}`;
+      return `${renderFormattedContent(match.prompt)}: ${renderFormattedContent(match.options[match.correct])}`;
     }).join("; ");
   }
 
   return answer.correctIndices.map((correctIndex) => {
-    return answer.options[correctIndex];
+    return renderFormattedContent(answer.options[correctIndex]);
   }).join(", ");
 }
 
 function renderAnswerQuestionText(answer) {
   return `
-    <p class="question-text">
-      ${answer.question}
-    </p>
+    <div class="question-text">
+      ${renderFormattedContent(answer.question)}
+    </div>
   `;
 }
 
@@ -871,4 +870,107 @@ function getGapKeys(question) {
 
 function normaliseAnswer(answer) {
   return String(answer).trim().toLowerCase();
+}
+
+function renderFillGapQuestionText(question, questionIndex) {
+  return question.text.split(/(\{[^}]+\})/g).map((part) => {
+    const gapMatch = part.match(/^\{([^}]+)\}$/);
+
+    if (!gapMatch) {
+      return renderFormattedContent(part);
+    }
+
+    const key = gapMatch[1];
+
+    return `
+      <input
+        class="fill-gap-input"
+        type="text"
+        name="question-${questionIndex}-gap-${escapeAttribute(key)}"
+        placeholder="${escapeAttribute(key)}"
+        autocomplete="off"
+      >
+    `;
+  }).join("");
+}
+
+function renderFormattedContent(value) {
+  const escapedValue = escapeHtml(value).replace(/\r\n/g, "\n");
+  const parts = [];
+  const codeBlockPattern = /```([a-zA-Z0-9_-]*)\n?([\s\S]*?)```/g;
+  let lastIndex = 0;
+  let match;
+
+  while ((match = codeBlockPattern.exec(escapedValue)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(renderFormattedText(escapedValue.slice(lastIndex, match.index)));
+    }
+
+    const language = match[1]
+      ? ` language-${escapeAttribute(match[1])}`
+      : "";
+
+    parts.push(`<pre class="formatted-code-block"><code class="${language.trim()}">${match[2]}</code></pre>`);
+    lastIndex = codeBlockPattern.lastIndex;
+  }
+
+  if (lastIndex < escapedValue.length) {
+    parts.push(renderFormattedText(escapedValue.slice(lastIndex)));
+  }
+
+  return parts.join("");
+}
+
+function renderFormattedText(escapedText) {
+  return escapedText
+    .split(/(`[^`\n]+`)/g)
+    .map((part) => {
+      if (part.startsWith("`") && part.endsWith("`")) {
+        return `<code class="formatted-inline-code">${part.slice(1, -1)}</code>`;
+      }
+
+      return part.replace(/\n/g, "<br>");
+    })
+    .join("");
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
+function escapeAttribute(value) {
+  return escapeHtml(value).replace(/`/g, "&#096;");
+}
+
+function typesetMath() {
+  if (!window.MathJax) {
+    mathTypesetPending = true;
+    return;
+  }
+
+  const runTypeset = () => {
+    if (window.MathJax.typesetPromise) {
+      mathTypesetPending = false;
+      window.MathJax.typesetPromise().catch((error) => {
+        console.error(error);
+      });
+      return;
+    }
+
+    mathTypesetPending = true;
+  };
+
+  if (window.MathJax.startup && window.MathJax.startup.promise) {
+    window.MathJax.startup.promise.then(runTypeset).catch((error) => {
+      console.error(error);
+    });
+    return;
+  }
+
+  runTypeset();
 }

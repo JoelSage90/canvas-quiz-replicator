@@ -54,11 +54,32 @@ fill-gap: inline text blanks. Each {key} needs an answer.
   "points": 1
 }
 
+Formatting supported in question text, options, matching prompts, and matching answers:
+
+Inline code:
+"text": "What does `git status` show?"
+
+Code blocks:
+"text": "What is printed by this code?\n```js\nconsole.log(2 + 2);\n```"
+
+Inline maths:
+"text": "Solve \\(x^2 = 16\\)."
+
+Display maths:
+"text": "Which rule is shown here?\n\\[ a^2 + b^2 = c^2 \\]"
+
+You may also use $$...$$ for display maths:
+"text": "Differentiate:\n$$ f(x) = x^3 + 2x $$"
+
 Rules:
 - Use double quotes and valid JSON only.
+- Escape LaTeX backslashes in JSON strings. For example, write \\(x^2\\), not \(x^2\).
+- Use \n inside JSON strings when a code block or display equation needs line breaks.
+- Wrap code blocks with triple backticks and an optional language name, such as ```js.
+- Use inline code with single backticks for commands, variables, and short snippets.
+- Use \\(...\\) for inline maths and \\[...\\] or $$...$$ for display maths.
 - Use zero-based indexes for "correct".
 - Base every question on the supplied content.
 - Use plausible distractors.
 - Award partial-credit-friendly points where practical.
 - Fill-gap answers are case-insensitive in the app.
-
